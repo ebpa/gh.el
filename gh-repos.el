@@ -90,12 +90,12 @@
 
 (defun gh-repos-user-list (&optional username) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
    (format "/users/%s/repos" (or username (gh-api-get-username api)))))
 
 (defun gh-repos-org-list (org) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
    (format "/orgs/%s/repos" org)))
 
 (defmethod gh-repos-repo-to-obj ((repo gh-repos-repo-stub)
@@ -120,14 +120,14 @@
 (defun gh-repos-repo-new (repo-stub ;; (api gh-repos-api)
                               &optional org &rest caps)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api repo-cls)) "POST"
+   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "POST"
    (if org (format "/orgs/%s/repos" org)
      "/user/repos")
    (apply 'gh-repos-repo-to-obj repo-stub caps)))
 
 (defun gh-repos-repo-get (repo-id &optional user) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api repo-cls)) "GET"
+   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "GET"
    (format "/repos/%s/%s"
            (or user (gh-api-get-username api))
            repo-id)))
@@ -135,7 +135,7 @@
 (defun gh-repos-repo-update (repo-stub ;; (api gh-repos-api)
                                  &optional user &rest caps)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api repo-cls)) "PATCH"
+   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "PATCH"
    (format "/repos/%s/%s"
            (or user (gh-api-get-username api))
            (oref repo-stub :name))
@@ -145,7 +145,7 @@
                                  &optional user)
   (let ((new-stub (make-instance 'gh-repos-repo-stub :name new-name)))
     (gh-api-authenticated-request
-     api (gh-object-reader (oref api repo-cls)) "PATCH"
+     gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "PATCH"
      (format "/repos/%s/%s"
              (or user (gh-api-get-username api))
              (oref repo-stub :name))
@@ -154,7 +154,7 @@
 (defun gh-repos-repo-delete (repo-id ;; (api gh-repos-api)
                                  &optional user)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api repo-cls)) "DELETE"
+   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "DELETE"
    (format "/repos/%s/%s"
            (or user (gh-api-get-username api))
            repo-id)))
@@ -163,7 +163,7 @@
 
 (defun gh-repos-repo-contributors (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api repo-cls)) "GET"
+   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "GET"
    (format "/repos/%s/%s/contributors"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
@@ -172,25 +172,25 @@
 
 (defun gh-repos-repo-languages (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "GET" (format "/repos/%s/%s/languages"
+   gh-api-session nil "GET" (format "/repos/%s/%s/languages"
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
 (defun gh-repos-repo-teams (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "GET" (format "/repos/%s/%s/teams"
+   gh-api-session nil "GET" (format "/repos/%s/%s/teams"
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
 (defun gh-repos-repo-tags (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "GET" (format "/repos/%s/%s/tags"
+   gh-api-session nil "GET" (format "/repos/%s/%s/tags"
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
 (defun gh-repos-repo-branches (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "GET" (format "/repos/%s/%s/branches"
+   gh-api-session nil "GET" (format "/repos/%s/%s/branches"
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
@@ -200,13 +200,13 @@
 
 (defun gh-repos-collaborators-list (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api user-cls)) "GET" (format "/repos/%s/%s/collaborators"
+   gh-api-session (gh-object-list-reader (oref gh-api-session user-cls)) "GET" (format "/repos/%s/%s/collaborators"
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
 (defun gh-repos-collaborators-p (repo user) ;; (api gh-repos-api)
   (eq (oref (gh-api-authenticated-request
-             api nil "GET"
+             gh-api-session nil "GET"
              (format "/repos/%s/%s/collaborators/%s"
                      (oref (oref repo :owner) :login)
                      (oref repo :name)
@@ -216,7 +216,7 @@
 
 (defun gh-repos-collaborators-add (repo user) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "PUT"
+   gh-api-session nil "PUT"
    (format "/repos/%s/%s/collaborators/%s"
            (oref (oref repo :owner) :login)
            (oref repo :name)
@@ -224,7 +224,7 @@
 
 (defun gh-repos-collaborators-delete (repo user) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "DELETE"
+   gh-api-session nil "DELETE"
    (format "/repos/%s/%s/collaborators/%s"
            (oref (oref repo :owner) :login)
            (oref repo :name)
@@ -239,7 +239,7 @@
 
 (defun gh-repos-forks-list (repo &optional recursive) ;; (api gh-repos-api)
   (let ((resp (gh-api-authenticated-request
-               api (gh-object-list-reader (oref api repo-cls)) "GET"
+               gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
                (format "/repos/%s/%s/forks"
                        (oref (oref repo :owner) :login)
                        (oref repo :name)))))
@@ -249,13 +249,13 @@
               (apply 'nconc forks
                      (mapcar
                       (lambda (f)
-                        (oref (gh-repos-forks-list api f t) data))
+                        (oref (gh-repos-forks-list f t) data))
                       forks)))))
     resp))
 
 (defun gh-repos-fork (repo &optional org) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api repo-cls)) "POST"
+   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "POST"
    (format "/repos/%s/%s/forks"
            (oref (oref repo :owner) :login)
            (oref repo :name))
@@ -269,19 +269,19 @@
 
 (defun gh-repos-stargazers (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api user-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session user-cls)) "GET"
    (format "/repos/%s/%s/stargazers"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
 
 (defun gh-repos-starred-list (&optional username) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
    (format "/users/%s/starred" (or username (gh-api-get-username api)))))
 
 (defun gh-repos-starred-p (repo) ;; (api gh-repos-api)
   (eq (oref (gh-api-authenticated-request
-             api nil "GET"
+             gh-api-session nil "GET"
              (format "/user/starred/%s/%s"
                      (oref (oref repo :owner) :login)
                      (oref repo :name)))
@@ -290,14 +290,14 @@
 
 (defun gh-repos-star (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "PUT"
+   gh-api-session nil "PUT"
    (format "/user/starred/%s/%s"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
 
 (defun gh-repos-unstar (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "DELETE"
+   gh-api-session nil "DELETE"
    (format "/user/starred/%s/%s"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
@@ -308,20 +308,20 @@
 
 (defun gh-repos-watchers (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api user-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session user-cls)) "GET"
    (format "/repos/%s/%s/subscribers"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
 
 (defun gh-repos-watched-list (&optional username) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
    (format "/users/%s/subscriptions"
            (or username (gh-api-get-username api)))))
 
 (defun gh-repos-watched-p (repo) ;; (api gh-repos-api)
   (eq (oref (gh-api-authenticated-request
-             api nil "GET"
+             gh-api-session nil "GET"
              (format "/user/subscriptions/%s/%s"
                      (oref (oref repo :owner) :login)
                      (oref repo :name)))
@@ -330,14 +330,14 @@
 
 (defun gh-repos-watch (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "PUT"
+   gh-api-session nil "PUT"
    (format "/user/subscriptions/%s/%s"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
 
 (defun gh-repos-unwatch (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   api nil "DELETE"
+   gh-api-session nil "DELETE"
    (format "/user/subscriptions/%s/%s"
            (oref (oref repo :owner) :login)
            (oref repo :name))))

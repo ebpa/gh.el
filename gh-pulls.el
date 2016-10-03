@@ -117,46 +117,46 @@
 
 (defun gh-pulls-list (user repo) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api req-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session req-cls)) "GET"
    (format "/repos/%s/%s/pulls" user repo)))
 
 (defun gh-pulls-get (user repo id) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api req-cls)) "GET"
+   gh-api-session (gh-object-reader (oref gh-api-session req-cls)) "GET"
    (format "/repos/%s/%s/pulls/%s" user repo id)))
 
 (defun gh-pulls-new (user repo req) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api req-cls)) "POST"
+   gh-api-session (gh-object-reader (oref gh-api-session req-cls)) "POST"
    (format "/repos/%s/%s/pulls" user repo)
    (gh-pulls-req-to-new req)))
 
 (defun gh-pulls-update (user repo id req) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api req-cls)) "PATCH"
+   gh-api-session (gh-object-reader (oref gh-api-session req-cls)) "PATCH"
    (format "/repos/%s/%s/pulls/%s" user repo id)
    (gh-pulls-req-to-update req)))
 
 ;;; Comments
 
 (defun gh-pulls-comments-list (user repo pull-id) ;; (api gh-pulls-api)
-  (gh-comments-list api (format "/repos/%s/%s/pulls/%s" user repo pull-id)))
+  (gh-comments-list (format "/repos/%s/%s/pulls/%s" user repo pull-id)))
 
 (defun gh-pulls-comments-get (user repo comment-id) ;; (api gh-pulls-api)
-  (gh-comments-get api (format "/repos/%s/%s/pulls" user repo) comment-id))
+  (gh-comments-get (format "/repos/%s/%s/pulls" user repo) comment-id))
 
 (defun gh-pulls-comments-update (
                                       user repo comment-id comment)
-  (gh-comments-update api (format "/repos/%s/%s/pulls" user repo)
+  (gh-comments-update (format "/repos/%s/%s/pulls" user repo)
                       comment-id (gh-comment-req-to-update comment)))
 
 (defun gh-pulls-comments-new (
                                    user repo pull-id comment)
-  (gh-comments-new api (format "/repos/%s/%s/pulls/%s" user repo pull-id)
+  (gh-comments-new (format "/repos/%s/%s/pulls/%s" user repo pull-id)
                    (gh-pulls-comment-req-to-create comment)))
 
 (defun gh-pulls-comments-delete (user repo comment-id) ;; (api gh-pulls-api)
-  (gh-comments-delete api (format "/repos/%s/%s/pulls" user repo) comment-id))
+  (gh-comments-delete (format "/repos/%s/%s/pulls" user repo) comment-id))
 
 (provide 'gh-pulls)
 ;;; gh-pulls.el ends here

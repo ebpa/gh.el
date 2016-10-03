@@ -40,7 +40,7 @@
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gists-buf))
                                (oref
-                                (gh-issues-issue-list api "octocat"
+                                (gh-issues-issue-list "octocat"
                                                       "Hello-World")
                                 :data)))))
     (should (equal (length issues) 1))

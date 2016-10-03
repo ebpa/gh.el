@@ -39,7 +39,7 @@
           (gh-test-with-traces-buffers ((repos-buf "get_repo_sample.txt"))
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output repos-buf))
-                               (oref (gh-repos-repo-get api "foo") :data)))))
+                               (oref (gh-repos-repo-get "foo") :data)))))
     (should (object-of-class-p repo 'gh-repos-repo))
     (gh-repos-test:test-regular-repo repo)))
 

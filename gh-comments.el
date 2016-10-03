@@ -42,29 +42,29 @@
 
 (defun gh-comments-list (base) ;; (api gh-comments-api-mixin)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api comment-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session comment-cls)) "GET"
    (format "%s/comments" (gh-ref-object-base base))))
 
 (defun gh-comments-get (base comment-id) ;; (api gh-comments-api-mixin)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api comment-cls)) "GET"
+   gh-api-session (gh-object-reader (oref gh-api-session comment-cls)) "GET"
    (format "%s/comments/%s" (gh-ref-object-base base) comment-id)))
 
 (defun gh-comments-update (base comment-id comment) ;; (api gh-comments-api-mixin)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api comment-cls)) "PATCH"
+   gh-api-session (gh-object-reader (oref gh-api-session comment-cls)) "PATCH"
    (format "%s/comments/%s" (gh-ref-object-base base) comment-id)
    (gh-comment-req-to-update comment)))
 
 (defun gh-comments-new (base comment) ;; (api gh-comments-api-mixin)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api comment-cls)) "POST"
+   gh-api-session (gh-object-reader (oref gh-api-session comment-cls)) "POST"
    (format "%s/comments" (gh-ref-object-base base))
    (gh-comment-req-to-update comment)))
 
 (defun gh-comments-delete (base comment-id) ;; (api gh-comments-api-mixin)
   (gh-api-authenticated-request
-   api nil "DELETE"
+   gh-api-session nil "DELETE"
    (format "%s/comments/%s" (gh-ref-object-base base) comment-id)))
 
 (provide 'gh-comments)

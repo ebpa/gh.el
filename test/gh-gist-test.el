@@ -40,7 +40,7 @@
           (gh-test-with-traces-buffers ((gists-buf "list_gists_sample.txt"))
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gists-buf))
-                               (oref (gh-gist-list api "octocat") :data)))))
+                               (oref (gh-gist-list "octocat") :data)))))
     (should (equal (length gists) 1))
     (let ((gist (car gists)))
       (should (object-of-class-p gist 'gh-gist-gist-stub))
@@ -52,7 +52,7 @@
           (gh-test-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gist-buf))
-                               (oref (gh-gist-get api "1") :data)))))
+                               (oref (gh-gist-get "1") :data)))))
     (should (object-of-class-p gist 'gh-gist-gist))
     (gh-gist-test:test-regular-gist gist)))
 
@@ -70,7 +70,7 @@
           (gh-test-with-traces-buffers ((gist-buf "get_gist_sample.txt"))
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output gist-buf))
-                               (oref (gh-gist-new api gist-stub) :data)))))
+                               (oref (gh-gist-new gist-stub) :data)))))
     (should (object-of-class-p gist 'gh-gist-gist))
     (gh-gist-test:test-regular-gist gist)))
 

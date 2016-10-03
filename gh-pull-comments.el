@@ -25,7 +25,7 @@
 
 ;; Basic usage:
 
-;; (setf api (gh-pull-comments-api "api" :sync nil :cache nil :num-retries 1))
+;; (setf gh-api-session (gh-pull-comments-api "api" :sync nil :cache nil :num-retries 1))
 ;; (setf comments (gh-pull-comments-list api "user" "repo" "pull request id"))
 ;; (setq my-comment (make-instance 'gh-pull-comments-comment
 ;; 				:body "This is great!"

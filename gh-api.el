@@ -45,6 +45,9 @@
   "Github API."
   :group 'gh)
 
+(defvar gh-api-api-session nil "Current GitHub API session.")
+;;(setq gh-api-session (gh-api "API"))
+
 (defcustom gh-api-username-filter 'gh-api-enterprise-username-filter
   "Filter to apply to usernames to build URL components"
   :type 'function
@@ -64,24 +67,24 @@
   "Github API")
 
 (defun logito-log (level tag string &rest objects) ;; (api gh-api)
-  (apply 'logito-log (oref api :log) level tag string objects))
+  (apply 'logito-log (oref gh-api-session :log) level tag string objects))
 
 (defmethod initialize-instance ((api gh-api) &rest args)
   (call-next-method))
 
 (defun gh-api-set-default-auth (api auth)
-  (let ((auth (or (oref api :auth) auth))
-        (cache (oref api :cache))
+  (let ((auth (or (oref gh-api-session :auth) auth))
+        (cache (oref gh-api-session :cache))
         (classname (symbol-name (funcall (if (fboundp 'eieio-object-class)
                                              'eieio-object-class
                                            'object-class)
                                          api))))
-    (oset api :auth auth)
+    (oset gh-api-session :auth auth)
     (unless (or (null cache)
                 (and (eieio-object-p cache)
                      (object-of-class-p cache 'gh-cache)))
-      (oset api :cache (make-instance
-                        (oref api cache-cls)
+      (oset gh-api-session :cache (make-instance
+                        (oref gh-api-session cache-cls)
                         :object-name
                         (format "gh/%s/%s"
                                 classname
@@ -95,7 +98,7 @@
   (replace-regexp-in-string (regexp-quote ".") "-" username))
 
 (defun gh-api-get-username () ;; (api gh-api)
-  (let ((username (oref (oref api :auth) :username)))
+  (let ((username (oref (oref gh-api-session :auth) :username)))
     (funcall gh-api-username-filter username)))
 
 ;;;###autoload
@@ -112,10 +115,10 @@
 (defmethod initialize-instance ((api gh-api-v3) &rest args)
   (call-next-method)
   (let ((gh-profile-current-profile (gh-profile-current-profile)))
-    (oset api :profile (gh-profile-current-profile))
-    (oset api :base (gh-profile-url))
+    (oset gh-api-session :profile (gh-profile-current-profile))
+    (oset gh-api-session :base (gh-profile-url))
     (gh-api-set-default-auth api
-                             (or (oref api :auth)
+                             (or (oref gh-api-session :auth)
                                  (funcall gh-api-v3-authenticator "auth")))))
 
 ;;;###autoload
@@ -180,14 +183,14 @@
 
 (defmethod gh-api-authenticated-request
   ((api gh-api) transformer method resource &optional data params page-limit)
-  (let* ((fmt (oref api :data-format))
+  (let* ((fmt (oref gh-api-session :data-format))
          (headers (cond ((eq fmt :form)
                          '(("Content-Type" .
                             "application/x-www-form-urlencoded")))
                         ((eq fmt :json)
                          '(("Content-Type" .
                             "application/json")))))
-         (cache (oref api :cache))
+         (cache (oref gh-api-session :cache))
          (key (list resource
                          method
                          (sha1 (format "%s" transformer))))
@@ -202,13 +205,13 @@
           (and (or (not has-value)
                    is-outdated)
                (gh-auth-modify-request
-                (oref api :auth)
+                (oref gh-api-session :auth)
                 ;; TODO: use gh-api-paged-request only when needed
                 (make-instance 'gh-api-paged-request
                                :method method
-                               :url (concat (oref api :base)
+                               :url (concat (oref gh-api-session :base)
                                             (gh-api-expand-resource
-                                             api resource))
+                                             gh-api-session resource))
                                :query params
                                :headers (if etag
                                             (cons (cons "If-None-Match" etag)

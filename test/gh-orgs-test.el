@@ -45,7 +45,7 @@
           (gh-test-with-traces-buffers ((orgs-buf "list_orgs_sample.txt"))
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
-                               (oref (gh-orgs-list api "dummy") :data)))))
+                               (oref (gh-orgs-list "dummy") :data)))))
     (should (equal (length orgs) 1))
     (let ((org (car orgs)))
       (should (object-of-class-p org 'gh-orgs-org-stub))
@@ -57,7 +57,7 @@
           (gh-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
-                               (oref (gh-orgs-get api "github") :data)))))
+                               (oref (gh-orgs-get "github") :data)))))
     (should (object-of-class-p org 'gh-orgs-org))
     (gh-orgs-test:test-regular-org org)))
 
@@ -73,7 +73,7 @@
           (gh-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
             (gh-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
-                               (oref (gh-orgs-update api org-stub) :data)))))
+                               (oref (gh-orgs-update org-stub) :data)))))
     (should (object-of-class-p org 'gh-orgs-org))
     (gh-orgs-test:test-regular-org org)))
 

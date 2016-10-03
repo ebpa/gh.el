@@ -25,7 +25,7 @@
 
 ;; Basic usage:
 
-;; (setf api (gh-issue-comments-api "api" :sync nil :cache nil :num-retries 1))
+;; (setf gh-api-session (gh-issue-comments-api "api" :sync nil :cache nil :num-retries 1))
 ;; (setf comments (gh-issue-comments-list api "user" "repo" "issue id"))
 ;; (setq my-comment (make-instance 'gh-issue-comments-comment :body "This is great!"))
 ;; (gh-issue-comments-new api "user" "repo" "issue id" my-comment)

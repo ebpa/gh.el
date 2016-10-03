@@ -91,17 +91,17 @@
 
 (defun gh-orgs-list (&optional username) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api org-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session org-cls)) "GET"
    (format "/users/%s/orgs" (or username (gh-api-get-username api)))))
 
 (defun gh-orgs-get (org) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api org-cls)) "GET"
+   gh-api-session (gh-object-reader (oref gh-api-session org-cls)) "GET"
    (format "/orgs/%s" org)))
 
 (defun gh-orgs-update (org-obj) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api org-cls)) "PATCH"
+   gh-api-session (gh-object-reader (oref gh-api-session org-cls)) "PATCH"
    (format "/orgs/%s" (oref org-obj :login))
    (apply 'gh-orgs-org-to-obj org-obj nil)))
 

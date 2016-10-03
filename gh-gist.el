@@ -109,35 +109,35 @@
 
 (defun gh-gist-list (&optional username) ;; (api gh-gist-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api gist-cls)) "GET"
+   gh-api-session (gh-object-list-reader (oref gh-api-session gist-cls)) "GET"
    (format "/users/%s/gists" (or username (gh-api-get-username api)))))
 
 (defun gh-gist-list-public ( ) ;; (api gh-gist-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api gist-cls)) "GET" "/gists/public"))
+   gh-api-session (gh-object-list-reader (oref gh-api-session gist-cls)) "GET" "/gists/public"))
 
 (defun gh-gist-list-starred ( ) ;; (api gh-gist-api)
   (gh-api-authenticated-request
-   api (gh-object-list-reader (oref api gist-cls)) "GET" "/gists/starred"))
+   gh-api-session (gh-object-list-reader (oref gh-api-session gist-cls)) "GET" "/gists/starred"))
 
 (defun gh-gist-get (gist-or-id) ;; (api gh-gist-api)
   (let (id transformer)
     (if (stringp gist-or-id)
         (setq id gist-or-id
-              transformer (gh-object-reader (oref api gist-cls)))
+              transformer (gh-object-reader (oref gh-api-session gist-cls)))
       (setq id (oref gist-or-id :id)
             transformer (gh-object-reader gist-or-id)))
     (gh-api-authenticated-request
-     api transformer "GET" (format "/gists/%s" id))))
+     gh-api-session transformer "GET" (format "/gists/%s" id))))
 
 (defun gh-gist-new (gist-stub) ;; (api gh-gist-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api gist-cls)) "POST" "/gists"
+   gh-api-session (gh-object-reader (oref gh-api-session gist-cls)) "POST" "/gists"
    (gh-gist-gist-to-obj gist-stub)))
 
 (defun gh-gist-edit (gist) ;; (api gh-gist-api)
   (gh-api-authenticated-request
-   api (gh-object-reader (oref api gist-cls)) "PATCH"
+   gh-api-session (gh-object-reader (oref gh-api-session gist-cls)) "PATCH"
    (format "/gists/%s"
            (oref gist :id))
    (gh-gist-gist-to-obj gist)))
@@ -146,27 +146,27 @@
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
-     api 'ignore (if star "PUT" "DELETE")
+     gh-api-session 'ignore (if star "PUT" "DELETE")
      (format "/gists/%s/star" id))))
 
 (defun gh-gist-get-star (gist-or-id) ;; (api gh-gist-api)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
-     api 'ignore "GET" (format "/gists/%s/star" id))))
+     gh-api-session 'ignore "GET" (format "/gists/%s/star" id))))
 
 (defun gh-gist-fork (gist-or-id) ;; (api gh-gist-api)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
-     api (gh-object-reader (oref api gist-cls)) "POST"
+     gh-api-session (gh-object-reader (oref gh-api-session gist-cls)) "POST"
      (format "/gists/%s/forks" id))))
 
 (defun gh-gist-delete (gist-or-id) ;; (api gh-gist-api)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
     (gh-api-authenticated-request
-     api 'ignore "DELETE" (format "/gists/%s" id))))
+     gh-api-session 'ignore "DELETE" (format "/gists/%s" id))))
 
 (provide 'gh-gist)
 ;;; gh-gist.el ends here
