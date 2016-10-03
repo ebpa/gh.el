@@ -37,11 +37,6 @@
 (require 'gh-common)
 
 ;;;###autoload
-(defclass gh-orgs-api (gh-api-v3)
-  ((org-cls :allocation :class :initform gh-orgs-org))
-  "Orgs API")
-
-;;;###autoload
 (gh-defclass gh-orgs-org-stub (gh-ref-object)
   ((login :initarg :login)
    (avatar-url :initarg :avatar-url)
@@ -91,17 +86,17 @@
 
 (defun gh-orgs-list (&optional username) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session org-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-orgs-org) "GET"
    (format "/users/%s/orgs" (or username (gh-api-get-username api)))))
 
 (defun gh-orgs-get (org) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session org-cls)) "GET"
+   gh-api-session (gh-object-reader gh-orgs-org) "GET"
    (format "/orgs/%s" org)))
 
 (defun gh-orgs-update (org-obj) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session org-cls)) "PATCH"
+   gh-api-session (gh-object-reader gh-orgs-org) "PATCH"
    (format "/orgs/%s" (oref org-obj :login))
    (apply 'gh-orgs-org-to-obj org-obj nil)))
 

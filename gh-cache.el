@@ -46,9 +46,7 @@
   ((version-constant :allocation :class)
    (entries :initarg :entries :initform (make-hash-table :test 'equal))
    (safe-methods :allocation :class :initform ("HEAD" "GET" "OPTIONS" "TRACE"))
-   (invalidation-chain :allocation :class :initform nil)
-
-   (entry-cls :initarg :entry-cls :initform gh-cache-entry)))
+   (invalidation-chain :allocation :class :initform nil)))
 
 (oset-default 'gh-cache version-constant gh-cache-version-constant)
 

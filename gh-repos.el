@@ -37,12 +37,6 @@
 (require 'gh-common)
 
 ;;;###autoload
-(defclass gh-repos-api (gh-api-v3)
-  ((repo-cls :allocation :class :initform gh-repos-repo)
-   (user-cls :allocation :class :initform gh-user))
-  "Repos API")
-
-;;;###autoload
 (gh-defclass gh-repos-repo-stub (gh-object)
   ((name :initarg :name)
    (description :initarg :description)
@@ -90,12 +84,12 @@
 
 (defun gh-repos-user-list (&optional username) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-repos-repo) "GET"
    (format "/users/%s/repos" (or username (gh-api-get-username api)))))
 
 (defun gh-repos-org-list (org) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-repos-repo) "GET"
    (format "/orgs/%s/repos" org)))
 
 (defmethod gh-repos-repo-to-obj ((repo gh-repos-repo-stub)
@@ -120,14 +114,14 @@
 (defun gh-repos-repo-new (repo-stub ;; (api gh-repos-api)
                               &optional org &rest caps)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "POST"
+   gh-api-session (gh-object-reader gh-repos-repo) "POST"
    (if org (format "/orgs/%s/repos" org)
      "/user/repos")
    (apply 'gh-repos-repo-to-obj repo-stub caps)))
 
 (defun gh-repos-repo-get (repo-id &optional user) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "GET"
+   gh-api-session (gh-object-reader gh-repos-repo) "GET"
    (format "/repos/%s/%s"
            (or user (gh-api-get-username api))
            repo-id)))
@@ -135,7 +129,7 @@
 (defun gh-repos-repo-update (repo-stub ;; (api gh-repos-api)
                                  &optional user &rest caps)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "PATCH"
+   gh-api-session (gh-object-reader gh-repos-repo) "PATCH"
    (format "/repos/%s/%s"
            (or user (gh-api-get-username api))
            (oref repo-stub :name))
@@ -145,7 +139,7 @@
                                  &optional user)
   (let ((new-stub (make-instance 'gh-repos-repo-stub :name new-name)))
     (gh-api-authenticated-request
-     gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "PATCH"
+     gh-api-session (gh-object-reader gh-repos-repo) "PATCH"
      (format "/repos/%s/%s"
              (or user (gh-api-get-username api))
              (oref repo-stub :name))
@@ -154,7 +148,7 @@
 (defun gh-repos-repo-delete (repo-id ;; (api gh-repos-api)
                                  &optional user)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "DELETE"
+   gh-api-session (gh-object-reader gh-repos-repo) "DELETE"
    (format "/repos/%s/%s"
            (or user (gh-api-get-username api))
            repo-id)))
@@ -163,7 +157,7 @@
 
 (defun gh-repos-repo-contributors (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "GET"
+   gh-api-session (gh-object-reader gh-repos-repo) "GET"
    (format "/repos/%s/%s/contributors"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
@@ -200,7 +194,7 @@
 
 (defun gh-repos-collaborators-list (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session user-cls)) "GET" (format "/repos/%s/%s/collaborators"
+   gh-api-session (gh-object-list-reader gh-user) "GET" (format "/repos/%s/%s/collaborators"
                          (oref (oref repo :owner) :login)
                          (oref repo :name))))
 
@@ -239,7 +233,7 @@
 
 (defun gh-repos-forks-list (repo &optional recursive) ;; (api gh-repos-api)
   (let ((resp (gh-api-authenticated-request
-               gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
+               gh-api-session (gh-object-list-reader gh-repos-repo) "GET"
                (format "/repos/%s/%s/forks"
                        (oref (oref repo :owner) :login)
                        (oref repo :name)))))
@@ -255,7 +249,7 @@
 
 (defun gh-repos-fork (repo &optional org) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session repo-cls)) "POST"
+   gh-api-session (gh-object-reader gh-repos-repo) "POST"
    (format "/repos/%s/%s/forks"
            (oref (oref repo :owner) :login)
            (oref repo :name))
@@ -269,14 +263,14 @@
 
 (defun gh-repos-stargazers (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session user-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-user) "GET"
    (format "/repos/%s/%s/stargazers"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
 
 (defun gh-repos-starred-list (&optional username) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-repos-repo) "GET"
    (format "/users/%s/starred" (or username (gh-api-get-username api)))))
 
 (defun gh-repos-starred-p (repo) ;; (api gh-repos-api)
@@ -308,14 +302,14 @@
 
 (defun gh-repos-watchers (repo) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session user-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-user) "GET"
    (format "/repos/%s/%s/subscribers"
            (oref (oref repo :owner) :login)
            (oref repo :name))))
 
 (defun gh-repos-watched-list (&optional username) ;; (api gh-repos-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session repo-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-repos-repo) "GET"
    (format "/users/%s/subscriptions"
            (or username (gh-api-get-username api)))))
 

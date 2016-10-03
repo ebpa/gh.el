@@ -46,14 +46,6 @@
                                    ("^/repos/.*/.*/pulls/.*$" . "\0")))))
 
 ;;;###autoload
-(defclass gh-pulls-api (gh-api-v3 gh-comments-api-mixin)
-  ((cache-cls :allocation :class :initform gh-pulls-cache)
-
-   (req-cls :allocation :class :initform gh-pulls-request)
-   (comment-cls :allocation :class :initform gh-pulls-comment))
-  "Git pull requests API")
-
-;;;###autoload
 (gh-defclass gh-pulls-comment (gh-comment)
   ((path :initarg :path)
    (diff-hunk :initarg :diff-hunk)
@@ -117,23 +109,23 @@
 
 (defun gh-pulls-list (user repo) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session req-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-pulls-request) "GET"
    (format "/repos/%s/%s/pulls" user repo)))
 
 (defun gh-pulls-get (user repo id) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session req-cls)) "GET"
+   gh-api-session (gh-object-reader gh-pulls-request) "GET"
    (format "/repos/%s/%s/pulls/%s" user repo id)))
 
 (defun gh-pulls-new (user repo req) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session req-cls)) "POST"
+   gh-api-session (gh-object-reader gh-pulls-request) "POST"
    (format "/repos/%s/%s/pulls" user repo)
    (gh-pulls-req-to-new req)))
 
 (defun gh-pulls-update (user repo id req) ;; (api gh-pulls-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session req-cls)) "PATCH"
+   gh-api-session (gh-object-reader gh-pulls-request) "PATCH"
    (format "/repos/%s/%s/pulls/%s" user repo id)
    (gh-pulls-req-to-update req)))
 

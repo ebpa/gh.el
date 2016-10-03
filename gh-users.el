@@ -37,11 +37,6 @@
 (require 'gh-common)
 
 ;;;###autoload
-(defclass gh-users-api (gh-api-v3)
-  ((users-cls :allocation :class :initform gh-users-user))
-  "Users API")
-
-;;;###autoload
 (gh-defclass gh-users-user (gh-user)
   ((gravatar-id :initarg :gravatar-id)
    (html-url :initarg :html-url)
@@ -72,14 +67,14 @@
 
 (defun gh-users-get (&optional username) ;; (api gh-users-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader (oref gh-api-session users-cls)) "GET"
+   gh-api-session (gh-object-reader gh-users-user) "GET"
    (if username
        (format "/users/%s" username)
      "/user")))
 
 (defun gh-users-list ( ) ;; (api gh-users-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader (oref gh-api-session users-cls)) "GET"
+   gh-api-session (gh-object-list-reader gh-users-user) "GET"
    "/users"))
 
 (provide 'gh-users)

@@ -25,11 +25,6 @@
 (require 'gh-users)
 (require 'gh-repos)
 
-;;;###autoload
-(defclass gh-search-api (gh-api-v3)
-  ((repo-cls :allocation :class :initform gh-repos-repo)
-   (user-cls :allocation :class :initform gh-users-user)))
-
 (defmacro gh-search-method-builder (method-name uri process-result-function)
   `(defmethod ,method-name ((search-api gh-search-api)
                                query-string &optional page-limit
@@ -42,17 +37,17 @@
       "GET" ,uri nil
       `((q . ,query-string) ,@additional-arguments) page-limit)))
 
-(defmacro gh-search-process-method-builder (method-name class-symbol)
+(defmacro gh-search-process-method-builder (method-name class)
   `(defmethod ,method-name ((search-api gh-search-api) data)
      (unless (listp data)
        (error "Did not recieve a list from the search query"))
      (let ((items (assoc 'items data)))
        (unless items
          (error "Search query did not return items"))
-       (gh-object-list-read (oref search-api ,class-symbol) (cdr items)))))
+       (gh-object-list-read ,class (cdr items)))))
 
-(gh-search-process-method-builder gh-process-repo-search-result repo-cls)
-(gh-search-process-method-builder gh-process-user-search-result user-cls)
+(gh-search-process-method-builder gh-process-repo-search-result gh-repos-repo)
+(gh-search-process-method-builder gh-process-user-search-result gh-users-user)
 (gh-search-method-builder gh-search-repos "/search/repositories"
                           gh-process-repo-search-result)
 (gh-search-method-builder gh-search-users "/search/users"

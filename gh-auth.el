@@ -128,8 +128,6 @@
 (defclass gh-password-authenticator (gh-authenticator)
   ((password :initarg :password :protection :private :initform nil)
    (remember :allocation :class :initform t)
-
-   (2fa-cls :initform gh-auth-2fa-callback :allocation :class))
   "Password-based authenticator")
 
 (defmethod initialize-instance ((auth gh-password-authenticator) &rest args)
@@ -146,7 +144,7 @@
                                              (encode-coding-string
                                               (oref auth :password) 'utf-8))))))
   (object-add-to-list req :install-callbacks
-                      (make-instance (oref auth 2fa-cls) :req req))
+                      (make-instance gh-auth-2fa-callback :req req))
   req)
 
 ;;;###autoload

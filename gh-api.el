@@ -60,10 +60,9 @@
    (base :initarg :base :type string)
    (profile :initarg :profile :type string)
    (auth :initarg :auth :initform nil)
-   (data-format :initarg :data-format)
+   (data-format :initarg :data-format :initform :json)
    (num-retries :initarg :num-retries :initform 0)
-   (log :initarg :log :initform nil)
-   (cache-cls :initform gh-cache :allocation :class))
+   (log :initarg :log :initform nil))
   "Github API")
 
 (defun logito-log (level tag string &rest objects) ;; (api gh-api)
@@ -84,7 +83,7 @@
                 (and (eieio-object-p cache)
                      (object-of-class-p cache 'gh-cache)))
       (oset gh-api-session :cache (make-instance
-                        (oref gh-api-session cache-cls)
+                             gh-cache
                         :object-name
                         (format "gh/%s/%s"
                                 classname
@@ -101,11 +100,6 @@
   (let ((username (oref (oref gh-api-session :auth) :username)))
     (funcall gh-api-username-filter username)))
 
-;;;###autoload
-(defclass gh-api-v3 (gh-api)
-  ((data-format :initarg :data-format :initform :json))
-  "Github API v3")
-
 (defcustom gh-api-v3-authenticator 'gh-oauth-authenticator
   "Authenticator for Github API v3"
   :type '(choice (const :tag "Password" gh-password-authenticator)
@@ -120,10 +114,6 @@
     (gh-api-set-default-auth api
                              (or (oref gh-api-session :auth)
                                  (funcall gh-api-v3-authenticator "auth")))))
-
-;;;###autoload
-(defclass gh-api-request (gh-url-request)
-  ((default-response-cls :allocation :class :initform gh-api-response)))
 
 ;;;###autoload
 (defclass gh-api-response (gh-url-response)
@@ -143,8 +133,7 @@
 
 ;;;###autoload
 (defclass gh-api-paged-request (gh-api-request)
-  ((default-response-cls :allocation :class :initform gh-api-paged-response)
-   (page-limit :initarg :page-limit :initform -1)))
+  ((page-limit :initarg :page-limit :initform -1)))
 
 ;;;###autoload
 (defclass gh-api-paged-response (gh-api-response)
@@ -227,7 +216,7 @@
                 (not is-outdated))
            (make-instance 'gh-api-response :data-received t :data value))
           (cache-key ;; no value, but cache exists and method is safe
-           (let ((resp (make-instance (oref req default-response-cls)
+           (let ((resp (make-instance gh-api-response
                                       :transform transformer)))
              (gh-url-run-request req resp)
              (gh-url-add-response-callback
@@ -237,11 +226,11 @@
           (cache ;; unsafe method, cache exists
            (pcache-invalidate cache key)
            (gh-url-run-request req (make-instance
-                                    (oref req default-response-cls)
+                                    gh-api-response
                                     :transform transformer)))
           (t ;; no cache involved
            (gh-url-run-request req (make-instance
-                                    (oref req default-response-cls)
+                                    gh-api-response
                                     :transform transformer))))))
 
 ;;;###autoload
