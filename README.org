@@ -1,0 +1,31 @@
+* gh.el
+
+[[https://travis-ci.org/sigma/gh.el][file:https://travis-ci.org/sigma/gh.el.png?branch=master]]
+[[https://coveralls.io/github/sigma/gh.el?branch=master][file:https://coveralls.io/repos/github/sigma/gh.el/badge.svg?branch=master]]
+
+This is a (very early) GitHub client library for Emacs.
+
+This library also allows implementation of the various authentication schemes (password, OAuth).
+
+Implementation is heavily based on EIEIO so that various components can be replaced easily.
+
+Current state:
+ - API v3 handler
+ - functional password- and oauth-based (default) authentication
+ - low-level APIs
+   - auth
+   - comments
+   - gist (used in separate project http://github.com/defunkt/gist.el )
+   - issues
+   - orgs
+   - pull requests (used in separate project http://github.com/sigma/magit-gh-pulls )
+   - repositories
+   - search
+ - support for local caching
+
+** TODO [#A] Consolidate "api" classes
+** TODO Remove api argument from methods (113 methods?)
+(d efun \([^ ]*\) ((api [^ ]*)\(.*\))
+
+ 'defmethod.*\(\(api.*api' * 
+** TODO Remove eieio object returns from all public methods 
