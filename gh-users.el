@@ -70,14 +70,14 @@
    (created-at :initarg :created-at)
    (update-at :initarg :update-at)))
 
-(defmethod gh-users-get ((api gh-users-api) &optional username)
+(defun gh-users-get (&optional username) ;; (api gh-users-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api users-cls)) "GET"
    (if username
        (format "/users/%s" username)
      "/user")))
 
-(defmethod gh-users-list ((api gh-users-api))
+(defun gh-users-list ( ) ;; (api gh-users-api)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api users-cls)) "GET"
    "/users"))

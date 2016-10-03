@@ -89,17 +89,17 @@
     ,@(when (slot-boundp org :name)
         (list (cons "name" (oref org :name))))))
 
-(defmethod gh-orgs-list ((api gh-orgs-api) &optional username)
+(defun gh-orgs-list (&optional username) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api org-cls)) "GET"
    (format "/users/%s/orgs" (or username (gh-api-get-username api)))))
 
-(defmethod gh-orgs-get ((api gh-orgs-api) org)
+(defun gh-orgs-get (org) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api org-cls)) "GET"
    (format "/orgs/%s" org)))
 
-(defmethod gh-orgs-update ((api gh-orgs-api) org-obj)
+(defun gh-orgs-update (org-obj) ;; (api gh-orgs-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api org-cls)) "PATCH"
    (format "/orgs/%s" (oref org-obj :login))

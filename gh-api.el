@@ -63,13 +63,13 @@
    (cache-cls :initform gh-cache :allocation :class))
   "Github API")
 
-(defmethod logito-log ((api gh-api) level tag string &rest objects)
+(defun logito-log (level tag string &rest objects) ;; (api gh-api)
   (apply 'logito-log (oref api :log) level tag string objects))
 
 (defmethod initialize-instance ((api gh-api) &rest args)
   (call-next-method))
 
-(defmethod gh-api-set-default-auth ((api gh-api) auth)
+(defun gh-api-set-default-auth (api auth)
   (let ((auth (or (oref api :auth) auth))
         (cache (oref api :cache))
         (classname (symbol-name (funcall (if (fboundp 'eieio-object-class)
@@ -87,14 +87,14 @@
                                 classname
                                 (gh-api-get-username api)))))))
 
-(defmethod gh-api-expand-resource ((api gh-api)
+(defun gh-api-expand-resource (
                                    resource)
   resource)
 
 (defun gh-api-enterprise-username-filter (username)
   (replace-regexp-in-string (regexp-quote ".") "-" username))
 
-(defmethod gh-api-get-username ((api gh-api))
+(defun gh-api-get-username () ;; (api gh-api)
   (let ((username (oref (oref api :auth) :username)))
     (funcall gh-api-username-filter username)))
 

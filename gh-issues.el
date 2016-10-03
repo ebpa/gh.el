@@ -56,6 +56,7 @@
    (comment-cls :allocation :class :initform gh-issues-comment))
   "Github Issues api")
 
+;; TODO should be names "...request"?
 ;;;###autoload
 (gh-defclass gh-issues-issue (gh-ref-object)
   ((number :initarg :number)
@@ -106,28 +107,28 @@
 (gh-defclass gh-issues-comment (gh-comment)
   ())
 
-(defmethod gh-issues-issue-list ((api gh-issues-api) user repo)
+(defun gh-issues-issue-list (user repo) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api issue-cls)) "GET"
    (format "/repos/%s/%s/issues" user repo)))
 
-(defmethod gh-issues-milestone-list ((api gh-issues-api) user repo)
+(defun gh-issues-milestone-list (user repo) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api milestone-cls)) "GET"
    (format "/repos/%s/%s/milestones" user repo)))
 
-(defmethod gh-issues-milestone-get ((api gh-issues-api) user repo id)
+(defun gh-issues-milestone-get (user repo id) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api milestone-cls)) "GET"
    (format "/repos/%s/%s/milestones/%s" user repo id)))
 
-(defmethod gh-issues-milestone-new ((api gh-issues-api) user repo milestone)
+(defun gh-issues-milestone-new (user repo milestone) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api milestone-cls)) "POST"
    (format "/repos/%s/%s/milestones" user repo)
    (gh-issues-milestone-req-to-update milestone)))
 
-(defmethod gh-issues-milestone-update ((api gh-issues-api) user repo
+(defun gh-issues-milestone-update (user repo ;; (api gh-issues-api)
                                        id milestone)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api milestone-cls)) "PATCH"
@@ -144,7 +145,7 @@
     (when due-on (nconc to-update `(("due_on" . ,due-on))))
     to-update))
 
-(defmethod gh-issues-issue-get ((api gh-issues-api) user repo id)
+(defun gh-issues-issue-get (user repo id) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api issue-cls)) "GET"
    (format "/repos/%s/%s/issues/%s" user repo id)))
@@ -164,13 +165,13 @@
       (nconc to-update `(("assignee" . ,(oref assignee :login)))))
     to-update))
 
-(defmethod gh-issues-issue-update ((api gh-issues-api) user repo id req)
+(defun gh-issues-issue-update (user repo id req) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api issue-cls)) "PATCH"
    (format "/repos/%s/%s/issues/%s" user repo id)
    (gh-issues-issue-req-to-update req)))
 
-(defmethod gh-issues-issue-new ((api gh-issues-api) user repo issue)
+(defun gh-issues-issue-new (user repo issue) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api issue-cls)) "POST"
    (format "/repos/%s/%s/issues" user repo)
@@ -178,42 +179,42 @@
 
 ;;; Labels
 
-(defmethod gh-issues-label-get ((api gh-issues-api) user repo name)
+(defun gh-issues-label-get (user repo name) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api label-cls)) "GET"
    (format "/repos/%s/%s/labels/%s" user repo name)))
 
-(defmethod gh-issues-label-list ((api gh-issues-api) user repo)
+(defun gh-issues-label-list (user repo) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-list-reader (oref api label-cls)) "GET"
    (format "/repos/%s/%s/labels" user repo )))
 
-(defmethod gh-issues-label-new ((api gh-issues-api) user repo req)
+(defun gh-issues-label-new (user repo req) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api label-cls)) "POST"
    (format "/repos/%s/%s/labels" user repo)
    (gh-issues-label-req-to-update req)))
 
-(defmethod gh-issues-label-update ((api gh-issues-api) user repo req)
+(defun gh-issues-label-update (user repo req) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api label-cls)) "POST"
    (format "/repos/%s/%s/labels/%s" user repo (oref req :name))
    (gh-issues-label-req-to-update req)))
 
-(defmethod gh-issues-label-delete ((api gh-issues-api) user repo name)
+(defun gh-issues-label-delete (user repo name) ;; (api gh-issues-api)
   (gh-api-authenticated-request
    api (gh-object-reader (oref api label-cls)) "DELETE"
    (format "/repos/%s/%s/labels/%s" user repo name)))
 
 
-(defmethod gh-issues-labels-in-issue ((api gh-issues-api) user repo
+(defun gh-issues-labels-in-issue (user repo ;; (api gh-issues-api)
                                       issue-or-issue-id)
   (let ((issue-id (gh-issues--issue-id issue-or-issue-id)))
    (gh-api-authenticated-request
     api (gh-object-list-reader (oref api label-cls)) "GET"
     (format "/repos/%s/%s/issues/%s/labels" user repo issue-id))))
 
-(defmethod gh-issues-labels-add-to-issue ((api gh-issues-api) user repo
+(defun gh-issues-labels-add-to-issue (user repo ;; (api gh-issues-api)
                                           issue-or-issue-id labels)
   (let ((issue-id (gh-issues--issue-id issue-or-issue-id)))
     (gh-api-authenticated-request
@@ -221,14 +222,14 @@
      (format "/repos/%s/%s/issues/%s/labels" user repo issue-id)
      (mapcar #'gh-issues--label-name labels))))
 
-(defmethod gh-issues-labels-remove-all-from-issue ((api gh-issues-api) user repo
+(defun gh-issues-labels-remove-all-from-issue (user repo ;; (api gh-issues-api)
                                                    issue-or-issue-id )
   (let ((issue-id (gh-issues--issue-id issue-or-issue-id)))
     (gh-api-authenticated-request
      api (lambda (x) x) "DELETE"
      (format "/repos/%s/%s/issues/%s/labels" user repo issue-id))))
 
-(defmethod gh-issues-labels-in-milestone ((api gh-issues-api) user repo
+(defun gh-issues-labels-in-milestone (user repo ;; (api gh-issues-api)
                                           milestone-or-milestone-id)
   (let ((milestone-id (gh-issues--milestone-id milestone-or-milestone-id)))
    (gh-api-authenticated-request
@@ -237,23 +238,23 @@
 
 ;;; Comments
 
-(defmethod gh-issues-comments-list ((api gh-issues-api) user repo issue-id)
+(defun gh-issues-comments-list (user repo issue-id) ;; (api gh-issues-api)
   (gh-comments-list api (format "/repos/%s/%s/issues/%s" user repo issue-id)))
 
-(defmethod gh-issues-comments-get ((api gh-issues-api) user repo comment-id)
+(defun gh-issues-comments-get (user repo comment-id) ;; (api gh-issues-api)
   (gh-comments-get api (format "/repos/%s/%s/issues" user repo) comment-id))
 
-(defmethod gh-issues-comments-update ((api gh-issues-api)
+(defun gh-issues-comments-update (
                                       user repo comment-id comment)
   (gh-comments-update api (format "/repos/%s/%s/issues" user repo)
                       comment-id (gh-comment-req-to-update comment)))
 
-(defmethod gh-issues-comments-new ((api gh-issues-api)
+(defun gh-issues-comments-new (
                                    user repo issue-id comment)
   (gh-comments-new api (format "/repos/%s/%s/issues/%s" user repo issue-id)
                    (gh-comment-req-to-update comment)))
 
-(defmethod gh-issues-comments-delete ((api gh-issues-api) user repo comment-id)
+(defun gh-issues-comments-delete (user repo comment-id) ;; (api gh-issues-api)
   (gh-comments-delete api (format "/repos/%s/%s/issues" user repo) comment-id))
 
 ;;; helpers
