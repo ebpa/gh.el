@@ -1,4 +1,4 @@
-* gh.el
+* github.el
 
 [[https://travis-ci.org/sigma/gh.el][file:https://travis-ci.org/sigma/gh.el.png?branch=master]]
 [[https://coveralls.io/github/sigma/gh.el?branch=master][file:https://coveralls.io/repos/github/sigma/gh.el/badge.svg?branch=master]]
@@ -29,3 +29,10 @@ Current state:
 
  'defmethod.*\(\(api.*api' * 
 ** TODO Remove eieio object returns from all public methods 
+** Running tests
+#+begin_src sh
+make test
+#+end_src
+*** TODO Switch to buttercup testing
+*** TODO Instructions for running tests
+** TODO Instructions for generating documentation?

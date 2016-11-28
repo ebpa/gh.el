@@ -60,29 +60,29 @@
 
 (defun gh-oauth-auth-list ( ) ;; (api gh-oauth-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader gh-oauth-authorization) "GET"
+   (gh-object-list-reader gh-oauth-authorization) "GET"
    (format "/authorizations")))
 
 (defun gh-oauth-auth-get (id) ;; (api gh-oauth-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader gh-oauth-authorization) "GET"
+   (gh-object-reader gh-oauth-authorization) "GET"
    (format "/authorizations/%s" id)))
 
 (defun gh-oauth-auth-new (&optional scopes) ;; (api gh-oauth-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader gh-oauth-authorization) "POST"
+   (gh-object-reader gh-oauth-authorization) "POST"
    (format "/authorizations") (list (cons 'scopes scopes)
                                     (cons 'note (format "gh.el - %s"
                                                         (system-name))))))
 
 (defun gh-oauth-auth-update (id &optional scopes) ;; (api gh-oauth-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader gh-oauth-authorization) "PATCH"
+   (gh-object-reader gh-oauth-authorization) "PATCH"
    (format "/authorizations/%s" id) (list (cons 'scopes scopes))))
 
 (defun gh-oauth-auth-delete (id) ;; (api gh-oauth-api)
   (gh-api-authenticated-request
-   gh-api-session nil "DELETE" (format "/authorizations/%s" id)))
+   nil "DELETE" (format "/authorizations/%s" id)))
 
 (provide 'gh-oauth)
 ;;; gh-oauth.el ends here

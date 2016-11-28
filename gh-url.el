@@ -58,7 +58,7 @@
 (defmethod gh-url-response-set-data ((resp gh-url-response) data)
   (let ((transform (oref resp :transform)))
     (oset resp :data
-          (if transform
+          (if nil ;;transform
               (funcall transform data)
             data))
     (oset resp :data-received t)))

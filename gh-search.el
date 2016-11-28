@@ -25,33 +25,36 @@
 (require 'gh-users)
 (require 'gh-repos)
 
-(defmacro gh-search-method-builder (method-name uri process-result-function)
-  `(defmethod ,method-name ((search-api gh-search-api)
-                               query-string &optional page-limit
-                               &rest additional-arguments)
-     (unless (and (stringp query-string) (> (length query-string) 1))
-       (error "a non-empty query string must be provided to github search"))
-     (gh-api-authenticated-request
-      search-api
-      (apply-partially (quote ,process-result-function) search-api)
-      "GET" ,uri nil
-      `((q . ,query-string) ,@additional-arguments) page-limit)))
+(defun gh-search-repos (query-string &optional page-limit &rest additional-arguments)
+  ""
+  (let* ((result (gh-api-authenticated-request
+                  nil
+                  "GET" "/search/repositories" nil
+                  `((q . ,query-string) ,@additional-arguments) page-limit))
+         (data (oref result :data)))
+    data))
 
-(defmacro gh-search-process-method-builder (method-name class)
-  `(defmethod ,method-name ((search-api gh-search-api) data)
-     (unless (listp data)
-       (error "Did not recieve a list from the search query"))
-     (let ((items (assoc 'items data)))
-       (unless items
-         (error "Search query did not return items"))
-       (gh-object-list-read ,class (cdr items)))))
+(defun gh-search-users (query-string &optional page-limit &rest additional-arguments)
+  ""
+  (let* ((result (gh-api-authenticated-request
+                  nil
+                  "GET" "/search/users" nil
+                  `((q . ,query-string) ,@additional-arguments) page-limit))
+         (data (oref result :data)))
+    data))
 
-(gh-search-process-method-builder gh-process-repo-search-result gh-repos-repo)
-(gh-search-process-method-builder gh-process-user-search-result gh-users-user)
-(gh-search-method-builder gh-search-repos "/search/repositories"
-                          gh-process-repo-search-result)
-(gh-search-method-builder gh-search-users "/search/users"
-                          gh-process-user-search-result)
+(gh-search-users "ebpa")
+
+;; (unless (and (stringp query-string) (> (length query-string) 1))
+;;   (error "a non-empty query string must be provided to github search"))
+
+(defun gh-search-process-search-result (data)
+  (unless (listp data)
+    (error "Did not recieve a list from the search query"))
+  (let ((items (assoc 'items data)))
+    (unless items
+      (error "Search query did not return items"))
+    (gh-object-list-read ,class (cdr items))))
 
 (provide 'gh-search)
 ;;; gh-search.el ends here

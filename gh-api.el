@@ -68,29 +68,25 @@
 (defun logito-log (level tag string &rest objects) ;; (api gh-api)
   (apply 'logito-log (oref gh-api-session :log) level tag string objects))
 
-(defmethod initialize-instance ((api gh-api) &rest args)
-  (call-next-method))
-
 (defun gh-api-set-default-auth (api auth)
-  (let ((auth (or (oref gh-api-session :auth) auth))
-        (cache (oref gh-api-session :cache))
+  (let ((auth (or (oref api :auth) auth))
+        (cache (oref api :cache))
         (classname (symbol-name (funcall (if (fboundp 'eieio-object-class)
                                              'eieio-object-class
                                            'object-class)
                                          api))))
-    (oset gh-api-session :auth auth)
+    (oset api :auth auth)
     (unless (or (null cache)
                 (and (eieio-object-p cache)
                      (object-of-class-p cache 'gh-cache)))
-      (oset gh-api-session :cache (make-instance
+      (oset api :cache (make-instance
                              gh-cache
                         :object-name
                         (format "gh/%s/%s"
                                 classname
                                 (gh-api-get-username api)))))))
 
-(defun gh-api-expand-resource (
-                                   resource)
+(defun gh-api-expand-resource (resource)
   resource)
 
 (defun gh-api-enterprise-username-filter (username)
@@ -106,13 +102,13 @@
                  (const :tag "OAuth" gh-oauth-authenticator))
   :group 'gh-api)
 
-(defmethod initialize-instance ((api gh-api-v3) &rest args)
+(defmethod initialize-instance ((api gh-api) &rest args)
   (call-next-method)
   (let ((gh-profile-current-profile (gh-profile-current-profile)))
-    (oset gh-api-session :profile (gh-profile-current-profile))
-    (oset gh-api-session :base (gh-profile-url))
+    (oset api :profile (gh-profile-current-profile))
+    (oset api :base (gh-profile-url))
     (gh-api-set-default-auth api
-                             (or (oref gh-api-session :auth)
+                             (or (oref api :auth)
                                  (funcall gh-api-v3-authenticator "auth")))))
 
 ;;;###autoload
@@ -130,6 +126,10 @@
 
 (defmethod gh-url-response-set-data ((resp gh-api-response) data)
   (call-next-method resp (gh-api-json-decode data)))
+
+;;;###autoload
+(defclass gh-api-request (gh-url-request)
+  ())
 
 ;;;###autoload
 (defclass gh-api-paged-request (gh-api-request)
@@ -170,16 +170,16 @@
           (oset req :query nil)
           (gh-url-run-request req resp))))))
 
-(defmethod gh-api-authenticated-request
-  ((api gh-api) transformer method resource &optional data params page-limit)
-  (let* ((fmt (oref gh-api-session :data-format))
+(defun gh-api-authenticated-request (transformer method resource &optional data params page-limit)
+  (let* ((api gh-api-session)
+         (fmt (oref api :data-format))
          (headers (cond ((eq fmt :form)
                          '(("Content-Type" .
                             "application/x-www-form-urlencoded")))
                         ((eq fmt :json)
                          '(("Content-Type" .
                             "application/json")))))
-         (cache (oref gh-api-session :cache))
+         (cache (oref api :cache))
          (key (list resource
                          method
                          (sha1 (format "%s" transformer))))
@@ -194,13 +194,12 @@
           (and (or (not has-value)
                    is-outdated)
                (gh-auth-modify-request
-                (oref gh-api-session :auth)
+                (oref api :auth)
                 ;; TODO: use gh-api-paged-request only when needed
                 (make-instance 'gh-api-paged-request
                                :method method
-                               :url (concat (oref gh-api-session :base)
-                                            (gh-api-expand-resource
-                                             gh-api-session resource))
+                               :url (concat (oref api :base)
+                                            (gh-api-expand-resource resource))
                                :query params
                                :headers (if etag
                                             (cons (cons "If-None-Match" etag)

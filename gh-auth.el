@@ -127,7 +127,7 @@
 ;;;###autoload
 (defclass gh-password-authenticator (gh-authenticator)
   ((password :initarg :password :protection :private :initform nil)
-   (remember :allocation :class :initform t)
+   (remember :allocation :class :initform t))
   "Password-based authenticator")
 
 (defmethod initialize-instance ((auth gh-password-authenticator) &rest args)

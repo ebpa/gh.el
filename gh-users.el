@@ -67,14 +67,14 @@
 
 (defun gh-users-get (&optional username) ;; (api gh-users-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-reader gh-users-user) "GET"
+   (gh-object-reader gh-users-user) "GET"
    (if username
        (format "/users/%s" username)
      "/user")))
 
 (defun gh-users-list ( ) ;; (api gh-users-api)
   (gh-api-authenticated-request
-   gh-api-session (gh-object-list-reader gh-users-user) "GET"
+   (gh-object-list-reader gh-users-user) "GET"
    "/users"))
 
 (provide 'gh-users)
