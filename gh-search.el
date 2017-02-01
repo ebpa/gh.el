@@ -1,4 +1,4 @@
-;;; gh-search.el --- repository search for gh.el
+;;; github-search.el --- repository search for github.el
 ;; Copyright (C) 2016  Ivan Malison
 
 ;; Author: Ivan Malison <IvanMalison@gmail.com>
@@ -22,39 +22,39 @@
 
 ;;; Code:
 
-(require 'gh-users)
-(require 'gh-repos)
+(require 'github-users)
+(require 'github-repos)
 
-(defun gh-search-repos (query-string &optional page-limit &rest additional-arguments)
+(defun github-search-repos (query-string &optional page-limit &rest additional-arguments)
   ""
-  (let* ((result (gh-api-authenticated-request
+  (let* ((result (github-api-authenticated-request
                   nil
                   "GET" "/search/repositories" nil
                   `((q . ,query-string) ,@additional-arguments) page-limit))
          (data (oref result :data)))
     data))
 
-(defun gh-search-users (query-string &optional page-limit &rest additional-arguments)
+(defun github-search-users (query-string &optional page-limit &rest additional-arguments)
   ""
-  (let* ((result (gh-api-authenticated-request
+  (let* ((result (github-api-authenticated-request
                   nil
                   "GET" "/search/users" nil
                   `((q . ,query-string) ,@additional-arguments) page-limit))
          (data (oref result :data)))
     data))
 
-(gh-search-users "ebpa")
+(github-search-users "ebpa")
 
 ;; (unless (and (stringp query-string) (> (length query-string) 1))
 ;;   (error "a non-empty query string must be provided to github search"))
 
-(defun gh-search-process-search-result (data)
+(defun github-search-process-search-result (data)
   (unless (listp data)
     (error "Did not recieve a list from the search query"))
   (let ((items (assoc 'items data)))
     (unless items
       (error "Search query did not return items"))
-    (gh-object-list-read ,class (cdr items))))
+    (github-object-list-read ,class (cdr items))))
 
-(provide 'gh-search)
-;;; gh-search.el ends here
+(provide 'github-search)
+;;; github-search.el ends here

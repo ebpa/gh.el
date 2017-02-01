@@ -1,4 +1,4 @@
-;;; gh-orgs-test.el --- test for gh-orgs.el
+;;; github-orgs-test.el --- test for github-orgs.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -26,56 +26,56 @@
 
 ;;; Code:
 
-(require 'gh-test)
-(require 'gh-orgs)
+(require 'github-test)
+(require 'github-orgs)
 
-(defun gh-orgs-test:test-regular-org-stub (org)
+(defun github-orgs-test:test-regular-org-stub (org)
   (should (equal (oref org :id) 1))
   (should (equal (oref org :login) "github"))
   (should (equal "https://github.com/images/error/octocat_happy.gif" (oref org :avatar-url))))
 
-(defun gh-orgs-test:test-regular-org (org)
-  (gh-orgs-test:test-regular-org-stub org)
+(defun github-orgs-test:test-regular-org (org)
+  (github-orgs-test:test-regular-org-stub org)
   (should (equal (oref org :public-gists) 1))
   (should (equal (oref org :public-repos) 2)))
 
-(ert-deftest gh-orgs-test:regular-list ()
-  (let* ((api (gh-test-mock-api 'gh-orgs-api))
+(ert-deftest github-orgs-test:regular-list ()
+  (let* ((api (github-test-mock-api 'github-orgs-api))
          (orgs
-          (gh-test-with-traces-buffers ((orgs-buf "list_orgs_sample.txt"))
-            (gh-test-mock-url ((:record-cls mocker-stub-record
+          (github-test-with-traces-buffers ((orgs-buf "list_orgs_sample.txt"))
+            (github-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
-                               (oref (gh-orgs-list "dummy") :data)))))
+                               (oref (github-orgs-list "dummy") :data)))))
     (should (equal (length orgs) 1))
     (let ((org (car orgs)))
-      (should (object-of-class-p org 'gh-orgs-org-stub))
-      (gh-orgs-test:test-regular-org-stub org))))
+      (should (object-of-class-p org 'github-orgs-org-stub))
+      (github-orgs-test:test-regular-org-stub org))))
 
-(ert-deftest gh-orgs-test:regular-get ()
-  (let* ((api (gh-test-mock-api 'gh-orgs-api))
+(ert-deftest github-orgs-test:regular-get ()
+  (let* ((api (github-test-mock-api 'github-orgs-api))
          (org
-          (gh-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
-            (gh-test-mock-url ((:record-cls mocker-stub-record
+          (github-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
+            (github-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
-                               (oref (gh-orgs-get "github") :data)))))
-    (should (object-of-class-p org 'gh-orgs-org))
-    (gh-orgs-test:test-regular-org org)))
+                               (oref (github-orgs-get "github") :data)))))
+    (should (object-of-class-p org 'github-orgs-org))
+    (github-orgs-test:test-regular-org org)))
 
-(ert-deftest gh-orgs-test:regular-update ()
-  (let* ((api (gh-test-mock-api 'gh-orgs-api))
+(ert-deftest github-orgs-test:regular-update ()
+  (let* ((api (github-test-mock-api 'github-orgs-api))
          (org-stub
-          (make-instance 'gh-orgs-org
+          (make-instance 'github-orgs-org
                          :login "github"
                          :id 1
                          :url "https://api.github.com/orgs/1"
                          :avatar-url "https://github.com/images/error/octocat_happy.gif"))
          (org
-          (gh-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
-            (gh-test-mock-url ((:record-cls mocker-stub-record
+          (github-test-with-traces-buffers ((orgs-buf "get_org_sample.txt"))
+            (github-test-mock-url ((:record-cls mocker-stub-record
                                              :output orgs-buf))
-                               (oref (gh-orgs-update org-stub) :data)))))
-    (should (object-of-class-p org 'gh-orgs-org))
-    (gh-orgs-test:test-regular-org org)))
+                               (oref (github-orgs-update org-stub) :data)))))
+    (should (object-of-class-p org 'github-orgs-org))
+    (github-orgs-test:test-regular-org org)))
 
-(provide 'gh-orgs-test)
-;;; gh-orgs-test.el ends here
+(provide 'github-orgs-test)
+;;; github-orgs-test.el ends here

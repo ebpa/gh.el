@@ -1,4 +1,4 @@
-;;; gh-pull-comments.el --- pull request comments api for github
+;;; github-pull-comments.el --- pull request comments api for github
 
 ;; Copyright (C) 2014 Toni Reina
 
@@ -25,14 +25,14 @@
 
 ;; Basic usage:
 
-;; (setf gh-api-session (gh-pull-comments-api "api" :sync nil :cache nil :num-retries 1))
-;; (setf comments (gh-pull-comments-list api "user" "repo" "pull request id"))
-;; (setq my-comment (make-instance 'gh-pull-comments-comment
+;; (setf github-api-session (github-pull-comments-api "api" :sync nil :cache nil :num-retries 1))
+;; (setf comments (github-pull-comments-list api "user" "repo" "pull request id"))
+;; (setq my-comment (make-instance 'github-pull-comments-comment
 ;; 				:body "This is great!"
 ;; 				:path "README.md"
 ;; 				:position 2
 ;; 				:commit-id "commit sha"))
-;; (gh-pull-comments-new api "user" "repo" "pull request id" my-comment)
+;; (github-pull-comments-new api "user" "repo" "pull request id" my-comment)
 
 ;;; Code:
 
@@ -42,36 +42,36 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-api)
-(require 'gh-auth)
-(require 'gh-common)
+(require 'github-api)
+(require 'github-auth)
+(require 'github-common)
 
-(require 'gh-pulls)
+(require 'github-pulls)
 
 (let ((ver "1.0.0"))
   (define-obsolete-function-alias
-      'gh-pull-comments-api 'gh-pulls-api ver)
+      'github-pull-comments-api 'github-pulls-api ver)
   (define-obsolete-function-alias
-      'gh-pull-comments-comment 'gh-pulls-comment ver)
+      'github-pull-comments-comment 'github-pulls-comment ver)
 
   (define-obsolete-function-alias
-      'gh-pull-comments-req-to-update 'gh-comment-req-to-update ver)
+      'github-pull-comments-req-to-update 'github-comment-req-to-update ver)
   (define-obsolete-function-alias
-      'gh-pull-comments-req-to-create 'gh-pulls-comment-req-to-create)
+      'github-pull-comments-req-to-create 'github-pulls-comment-req-to-create)
 
   (define-obsolete-function-alias
-      'gh-pull-comments-list 'gh-pulls-comments-list ver)
+      'github-pull-comments-list 'github-pulls-comments-list ver)
   (define-obsolete-function-alias
-      'gh-pull-comments-get 'gh-pulls-comments-get ver)
+      'github-pull-comments-get 'github-pulls-comments-get ver)
   (define-obsolete-function-alias
-      'gh-pull-comments-update 'gh-pulls-comments-update ver)
+      'github-pull-comments-update 'github-pulls-comments-update ver)
   (define-obsolete-function-alias
-      'gh-pull-comments-new 'gh-pulls-comments-new ver)
+      'github-pull-comments-new 'github-pulls-comments-new ver)
   (define-obsolete-function-alias
-      'gh-pull-comments-delete 'gh-pulls-comments-delete ver))
+      'github-pull-comments-delete 'github-pulls-comments-delete ver))
 
-(provide 'gh-pull-comments)
-;;; gh-pull-comments.el ends here
+(provide 'github-pull-comments)
+;;; github-pull-comments.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

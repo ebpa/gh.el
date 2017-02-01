@@ -1,4 +1,4 @@
-;;; gh.el --- Github API client libraries
+;;; github.el --- Github API client libraries
 
 ;; Copyright (C) 2011  Yann Hodique
 
@@ -26,13 +26,13 @@
 
 ;;; Code:
 
-(require 'gh-gist)
-(require 'gh-pulls)
-(require 'gh-issues)
-(require 'gh-users)
+(require 'github-gist)
+(require 'github-pulls)
+(require 'github-issues)
+(require 'github-users)
 
-(provide 'gh)
-;;; gh.el ends here
+(provide 'github)
+;;; github.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

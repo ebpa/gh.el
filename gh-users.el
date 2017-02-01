@@ -1,4 +1,4 @@
-;;; gh-users.el --- users module for gh.el
+;;; github-users.el --- users module for github.el
 
 ;; Copyright (C) 2013  Yann Hodique
 
@@ -32,12 +32,12 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-api)
-(require 'gh-auth)
-(require 'gh-common)
+(require 'github-api)
+(require 'github-auth)
+(require 'github-common)
 
 ;;;###autoload
-(gh-defclass gh-users-user (gh-user)
+(github-defclass github-users-user (github-user)
   ((gravatar-id :initarg :gravatar-id)
    (html-url :initarg :html-url)
    (followers-url :initarg :followers-url)
@@ -65,17 +65,17 @@
    (created-at :initarg :created-at)
    (update-at :initarg :update-at)))
 
-(defun gh-users-get (&optional username) ;; (api gh-users-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-users-user) "GET"
+(defun github-users-get (&optional username) ;; (api github-users-api)
+  (github-api-authenticated-request
+   (github-object-reader github-users-user) "GET"
    (if username
        (format "/users/%s" username)
      "/user")))
 
-(defun gh-users-list ( ) ;; (api gh-users-api)
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-users-user) "GET"
+(defun github-users-list ( ) ;; (api github-users-api)
+  (github-api-authenticated-request
+   (github-object-list-reader github-users-user) "GET"
    "/users"))
 
-(provide 'gh-users)
-;;; gh-users.el ends here
+(provide 'github-users)
+;;; github-users.el ends here

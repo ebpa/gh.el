@@ -1,4 +1,4 @@
-;;; gh-issue-comments.el --- issue comments api for github
+;;; github-issue-comments.el --- issue comments api for github
 
 ;; Copyright (C) 2014 Travis Thieman
 
@@ -25,10 +25,10 @@
 
 ;; Basic usage:
 
-;; (setf gh-api-session (gh-issue-comments-api "api" :sync nil :cache nil :num-retries 1))
-;; (setf comments (gh-issue-comments-list api "user" "repo" "issue id"))
-;; (setq my-comment (make-instance 'gh-issue-comments-comment :body "This is great!"))
-;; (gh-issue-comments-new api "user" "repo" "issue id" my-comment)
+;; (setf github-api-session (github-issue-comments-api "api" :sync nil :cache nil :num-retries 1))
+;; (setf comments (github-issue-comments-list api "user" "repo" "issue id"))
+;; (setq my-comment (make-instance 'github-issue-comments-comment :body "This is great!"))
+;; (github-issue-comments-new api "user" "repo" "issue id" my-comment)
 
 ;;; Code:
 
@@ -38,34 +38,34 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-api)
-(require 'gh-auth)
-(require 'gh-common)
+(require 'github-api)
+(require 'github-auth)
+(require 'github-common)
 
-(require 'gh-issues)
+(require 'github-issues)
 
 (let ((ver "1.0.0"))
   (define-obsolete-function-alias
-      'gh-issue-comments-api 'gh-issues-api ver)
+      'github-issue-comments-api 'github-issues-api ver)
   (define-obsolete-function-alias
-      'gh-issue-comments-comment 'gh-issues-comment ver)
+      'github-issue-comments-comment 'github-issues-comment ver)
 
   (define-obsolete-function-alias
-      'gh-issue-comments-req-to-update 'gh-comment-req-to-update ver)
+      'github-issue-comments-req-to-update 'github-comment-req-to-update ver)
 
   (define-obsolete-function-alias
-      'gh-issue-comments-list 'gh-issues-comments-list ver)
+      'github-issue-comments-list 'github-issues-comments-list ver)
   (define-obsolete-function-alias
-      'gh-issue-comments-get 'gh-issues-comments-get ver)
+      'github-issue-comments-get 'github-issues-comments-get ver)
   (define-obsolete-function-alias
-      'gh-issue-comments-update 'gh-issues-comments-update ver)
+      'github-issue-comments-update 'github-issues-comments-update ver)
   (define-obsolete-function-alias
-      'gh-issue-comments-new 'gh-issues-comments-new ver)
+      'github-issue-comments-new 'github-issues-comments-new ver)
   (define-obsolete-function-alias
-      'gh-issue-comments-delete 'gh-issues-comments-delete ver))
+      'github-issue-comments-delete 'github-issues-comments-delete ver))
 
-(provide 'gh-issue-comments)
-;;; gh-issue-comments.el ends here
+(provide 'github-issue-comments)
+;;; github-issue-comments.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

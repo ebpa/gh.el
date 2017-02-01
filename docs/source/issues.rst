@@ -2,30 +2,30 @@
  Issues
 ========
 
-gh.el is built on top of Eieio. The scope of this client library is to provide
+github.el is built on top of Eieio. The scope of this client library is to provide
 plumbing primitives that will allow full use of the GitHub API.
 
 
-gh.el allows access to GitHub issues.
+github.el allows access to GitHub issues.
 
 First, connect to the API::
 
-  (gh-issues-api "api")
+  (github-issues-api "api")
 
 This will OAuth connect to GitHub and return an API connection object.
 
 The API connection object can be passed to issues methods::
 
-  (gh-issues-issue-list (gh-issues-api "API") "sigma" "gh.el")
+  (github-issues-issue-list (github-issues-api "API") "sigma" "github.el")
 
-The issue list has a class `gh-api-paged-response` which has a member
+The issue list has a class `github-api-paged-response` which has a member
 `data` which can be used to retrieve the data sent back from GitHub::
 
   (oref
-    (gh-issues-issue-list (gh-issues-api "API") "sigma" "gh.el")
+    (github-issues-issue-list (github-issues-api "API") "sigma" "github.el")
     data)
 
-This returns a list of items of class `gh-issues-issue`. You can
+This returns a list of items of class `github-issues-issue`. You can
 further `oref` those to get data. Putting it all together we might have::
 
 
@@ -47,7 +47,7 @@ further `oref` those to get data. Putting it all together we might have::
            (replace-regexp-in-string
               "\r" "\n" (oref it body)))))  ; the body filled
        (oref
-        (gh-issues-issue-list ghcon "sigma" "gh.el")
+        (github-issues-issue-list ghcon "sigma" "github.el")
         data)))
 
 

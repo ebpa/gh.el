@@ -1,6 +1,6 @@
-(defun gh-get-rate-limit-status ()
+(defun github-get-rate-limit-status ()
   "Get your current rate limit status"
   ;;GET /rate_limit
   )
 
-(provide 'gh-rate-limit)
+(provide 'github-rate-limit)

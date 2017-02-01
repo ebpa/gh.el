@@ -1,4 +1,4 @@
-;;; gh-oauth.el --- oauth module for gh.el
+;;; github-oauth.el --- oauth module for github.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -32,60 +32,60 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-api)
-(require 'gh-auth)
-(require 'gh-common)
+(require 'github-api)
+(require 'github-auth)
+(require 'github-common)
 
 ;;;###autoload
-(defclass gh-oauth-password-authenticator (gh-password-authenticator)
+(defclass github-oauth-password-authenticator (github-password-authenticator)
   ((remember :allocation :class :initform nil)))
 
-(defun initialize-instance (&rest args) ;; (api gh-oauth-api)
+(defun initialize-instance (&rest args) ;; (api github-oauth-api)
   ;; force password authentication for this API
-  (let ((gh-api-v3-authenticator 'gh-oauth-password-authenticator))
+  (let ((github-api-v3-authenticator 'github-oauth-password-authenticator))
     (call-next-method)))
 
 ;;;###autoload
-(gh-defclass gh-oauth-authorization (gh-ref-object)
+(github-defclass github-oauth-authorization (github-ref-object)
   ((scopes :initarg :scopes)
    (token :initarg :token)
-   (app :initarg :app :initform nil :marshal-type gh-oauth-app)
+   (app :initarg :app :initform nil :marshal-type github-oauth-app)
    (updated-at :initarg :updated-at)
    (created-at :initarg :created-at)))
 
 ;;;###autoload
-(gh-defclass gh-oauth-app (gh-object)
+(github-defclass github-oauth-app (github-object)
   ((url :initarg :url)
    (name :initarg :name)))
 
-(defun gh-oauth-auth-list ( ) ;; (api gh-oauth-api)
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-oauth-authorization) "GET"
+(defun github-oauth-auth-list ( ) ;; (api github-oauth-api)
+  (github-api-authenticated-request
+   (github-object-list-reader github-oauth-authorization) "GET"
    (format "/authorizations")))
 
-(defun gh-oauth-auth-get (id) ;; (api gh-oauth-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-oauth-authorization) "GET"
+(defun github-oauth-auth-get (id) ;; (api github-oauth-api)
+  (github-api-authenticated-request
+   (github-object-reader github-oauth-authorization) "GET"
    (format "/authorizations/%s" id)))
 
-(defun gh-oauth-auth-new (&optional scopes) ;; (api gh-oauth-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-oauth-authorization) "POST"
+(defun github-oauth-auth-new (&optional scopes) ;; (api github-oauth-api)
+  (github-api-authenticated-request
+   (github-object-reader github-oauth-authorization) "POST"
    (format "/authorizations") (list (cons 'scopes scopes)
-                                    (cons 'note (format "gh.el - %s"
+                                    (cons 'note (format "github.el - %s"
                                                         (system-name))))))
 
-(defun gh-oauth-auth-update (id &optional scopes) ;; (api gh-oauth-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-oauth-authorization) "PATCH"
+(defun github-oauth-auth-update (id &optional scopes) ;; (api github-oauth-api)
+  (github-api-authenticated-request
+   (github-object-reader github-oauth-authorization) "PATCH"
    (format "/authorizations/%s" id) (list (cons 'scopes scopes))))
 
-(defun gh-oauth-auth-delete (id) ;; (api gh-oauth-api)
-  (gh-api-authenticated-request
+(defun github-oauth-auth-delete (id) ;; (api github-oauth-api)
+  (github-api-authenticated-request
    nil "DELETE" (format "/authorizations/%s" id)))
 
-(provide 'gh-oauth)
-;;; gh-oauth.el ends here
+(provide 'github-oauth)
+;;; github-oauth.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

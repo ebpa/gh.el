@@ -1,4 +1,4 @@
-;;; gh-gist.el --- gist module for gh.el
+;;; github-gist.el --- gist module for github.el
 
 ;; Copyright (C) 2011  Yann Hodique
 
@@ -32,68 +32,68 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-api)
-(require 'gh-auth)
-(require 'gh-common)
+(require 'github-api)
+(require 'github-auth)
+(require 'github-common)
 
 ;;;###autoload
-(gh-defclass gh-gist-gist-stub (gh-object)
-  ((files :initarg :files :type list :initform nil :marshal-type (list gh-gist-gist-file))
+(github-defclass github-gist-gist-stub (github-object)
+  ((files :initarg :files :type list :initform nil :marshal-type (list github-gist-gist-file))
    (public :initarg :public :marshal-type bool)
    (description :initarg :description))
   "Class for user-created gist objects")
 
 ;;;###autoload
-(gh-defclass gh-gist-history-change (gh-object)
+(github-defclass github-gist-history-change (github-object)
   ((total :initarg :total)
    (additions :initarg :additions)
    (deletions :initarg :deletions)))
 
 ;;;###autoload
-(gh-defclass gh-gist-history-entry (gh-object)
-  ((user :initarg :user :initform nil :marshal-type gh-user)
+(github-defclass github-gist-history-entry (github-object)
+  ((user :initarg :user :initform nil :marshal-type github-user)
    (version :initarg :version)
    (committed :initarg :committed :marshal ((alist . committed_at)))
    (change :initarg :change :marshal ((alist . change_status))
-           :marshal-type gh-gist-history-change)
+           :marshal-type github-gist-history-change)
    (url :initarg :url)))
 
 ;;;###autoload
-(gh-defclass gh-gist-fork-entry (gh-ref-object)
-  ((user :initarg :user :initform nil :marshal-type gh-user)
+(github-defclass github-gist-fork-entry (github-ref-object)
+  ((user :initarg :user :initform nil :marshal-type github-user)
    (created :initarg :created :marshal ((alist . created_at)))
    (updated :initarg :updated :marshal ((alist . updated_at)))))
 
 ;;;###autoload
-(gh-defclass gh-gist-gist (gh-ref-object gh-gist-gist-stub)
+(github-defclass github-gist-gist (github-ref-object github-gist-gist-stub)
   ((date :initarg :date :marshal ((alist . created_at)))
    (update :initarg :update :marshal ((alist . updated_at)))
    (push-url :initarg :push-url :marshal ((alist . git_push_url)))
    (pull-url :initarg :pull-url :marshal ((alist . git_pull_url)))
    (comments :initarg :comments)
-   (user :initarg :user :initform nil :marshal-type gh-user :marshal ((alist . owner)))
-   (history :initarg :history :initform nil :type list :marshal-type (list gh-gist-history-entry))
-   (forks :initarg :forks :initform nil :type list :marshal-type (list gh-gist-fork-entry)))
+   (user :initarg :user :initform nil :marshal-type github-user :marshal ((alist . owner)))
+   (history :initarg :history :initform nil :type list :marshal-type (list github-gist-history-entry))
+   (forks :initarg :forks :initform nil :type list :marshal-type (list github-gist-fork-entry)))
   "Gist object")
 
 ;;;###autoload
-(gh-defclass gh-gist-gist-file (gh-object)
+(github-defclass github-gist-gist-file (github-object)
   ((filename :initarg :filename)
    (size :initarg :size)
    (url :initarg :url :marshal ((alist . raw_url)))
    (content :initarg :content)))
 
-(defmethod gh-gist-gist-to-obj ((gist gh-gist-gist-stub))
-  (let ((files (mapcar #'gh-gist-gist-file-to-obj (oref gist :files))))
+(defmethod github-gist-gist-to-obj ((gist github-gist-gist-stub))
+  (let ((files (mapcar #'github-gist-gist-file-to-obj (oref gist :files))))
     `(("description" . ,(oref gist :description))
       ("public" . ,(oref gist :public))
       ,@(and files (list (cons "files"  files))))))
 
-(defmethod gh-gist-gist-has-files ((gist gh-gist-gist-stub))
+(defmethod github-gist-gist-has-files ((gist github-gist-gist-stub))
   (not (memq nil (mapcar (lambda (f)
                            (oref f :content)) (oref gist :files)))))
 
-(defmethod gh-gist-gist-file-to-obj ((file gh-gist-gist-file))
+(defmethod github-gist-gist-file-to-obj ((file github-gist-gist-file))
   (let* ((filename (oref file :filename))
         (content (oref file :content))
         (file (if content
@@ -102,69 +102,69 @@
                 nil)))
     (cons filename file)))
 
-(defun gh-gist-list (&optional username)
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-gist-gist) "GET"
-   (format "/users/%s/gists" (or username (gh-api-get-username api)))))
+(defun github-gist-list (&optional username)
+  (github-api-authenticated-request
+   (github-object-list-reader github-gist-gist) "GET"
+   (format "/users/%s/gists" (or username (github-api-get-username api)))))
 
-(defun gh-gist-list-public ( )
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-gist-gist) "GET" "/gists/public"))
+(defun github-gist-list-public ( )
+  (github-api-authenticated-request
+   (github-object-list-reader github-gist-gist) "GET" "/gists/public"))
 
-(defun gh-gist-list-starred ( )
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-gist-gist) "GET" "/gists/starred"))
+(defun github-gist-list-starred ( )
+  (github-api-authenticated-request
+   (github-object-list-reader github-gist-gist) "GET" "/gists/starred"))
 
-(defun gh-gist-get (gist-or-id)
+(defun github-gist-get (gist-or-id)
   (let (id transformer)
     (if (stringp gist-or-id)
         (setq id gist-or-id
-              transformer (gh-object-reader gh-gist-gist))
+              transformer (github-object-reader github-gist-gist))
       (setq id (oref gist-or-id :id)
-            transformer (gh-object-reader gist-or-id)))
-    (gh-api-authenticated-request
+            transformer (github-object-reader gist-or-id)))
+    (github-api-authenticated-request
      transformer "GET" (format "/gists/%s" id))))
 
-(defun gh-gist-new (gist-stub)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-gist-gist) "POST" "/gists"
-   (gh-gist-gist-to-obj gist-stub)))
+(defun github-gist-new (gist-stub)
+  (github-api-authenticated-request
+   (github-object-reader github-gist-gist) "POST" "/gists"
+   (github-gist-gist-to-obj gist-stub)))
 
-(defun gh-gist-edit (gist)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-gist-gist) "PATCH"
+(defun github-gist-edit (gist)
+  (github-api-authenticated-request
+   (github-object-reader github-gist-gist) "PATCH"
    (format "/gists/%s"
            (oref gist :id))
-   (gh-gist-gist-to-obj gist)))
+   (github-gist-gist-to-obj gist)))
 
-(defun gh-gist-set-star (gist-or-id star)
+(defun github-gist-set-star (gist-or-id star)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
-    (gh-api-authenticated-request
+    (github-api-authenticated-request
      'ignore (if star "PUT" "DELETE")
      (format "/gists/%s/star" id))))
 
-(defun gh-gist-get-star (gist-or-id)
+(defun github-gist-get-star (gist-or-id)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
-    (gh-api-authenticated-request
+    (github-api-authenticated-request
      'ignore "GET" (format "/gists/%s/star" id))))
 
-(defun gh-gist-fork (gist-or-id)
+(defun github-gist-fork (gist-or-id)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
-    (gh-api-authenticated-request
-     (gh-object-reader gh-gist-gist) "POST"
+    (github-api-authenticated-request
+     (github-object-reader github-gist-gist) "POST"
      (format "/gists/%s/forks" id))))
 
-(defun gh-gist-delete (gist-or-id)
+(defun github-gist-delete (gist-or-id)
   (let ((id (if (stringp gist-or-id) gist-or-id
               (oref gist-or-id :id))))
-    (gh-api-authenticated-request
+    (github-api-authenticated-request
      'ignore "DELETE" (format "/gists/%s" id))))
 
-(provide 'gh-gist)
-;;; gh-gist.el ends here
+(provide 'github-gist)
+;;; github-gist.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

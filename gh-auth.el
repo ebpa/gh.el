@@ -1,4 +1,4 @@
-;;; gh-auth.el --- authentication for gh.el
+;;; github-auth.el --- authentication for github.el
 
 ;; Copyright (C) 2011  Yann Hodique
 
@@ -32,84 +32,84 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-profile)
-(require 'gh-common)
-(require 'gh-url)
+(require 'github-profile)
+(require 'github-common)
+(require 'github-url)
 
-(defgroup gh-auth nil
+(defgroup github-auth nil
   "Github authentication."
-  :group 'gh)
+  :group 'github)
 
-(defvar gh-auth-alist nil)
+(defvar github-auth-alist nil)
 
-(defun gh-auth-remember (profile key value)
-  (let ((cell (assoc profile gh-auth-alist)))
+(defun github-auth-remember (profile key value)
+  (let ((cell (assoc profile github-auth-alist)))
     (when (not cell)
       (setq cell (cons profile nil))
-      (setq gh-auth-alist (append gh-auth-alist (list cell))))
+      (setq github-auth-alist (append github-auth-alist (list cell))))
     (setcdr cell (plist-put (cdr cell) key value))))
 
-(defun gh-auth-get-username ()
-  (let* ((profile (gh-profile-current-profile))
-         (user (or (plist-get (cdr (assoc profile gh-auth-alist)) :username)
-                   (plist-get (cdr (assoc profile gh-profile-alist)) :username)
-                   (gh-config "user"))))
+(defun github-auth-get-username ()
+  (let* ((profile (github-profile-current-profile))
+         (user (or (plist-get (cdr (assoc profile github-auth-alist)) :username)
+                   (plist-get (cdr (assoc profile github-profile-alist)) :username)
+                   (github-config "user"))))
     (when (not user)
       (setq user (read-string "GitHub username: "))
-      (gh-set-config "user" user))
-    (gh-auth-remember profile :username user)
+      (github-set-config "user" user))
+    (github-auth-remember profile :username user)
     user))
 
-(defun gh-auth-get-password (&optional remember)
-  (let* ((profile (gh-profile-current-profile))
-         (pass (or (plist-get (cdr (assoc profile gh-auth-alist)) :password)
-                   (plist-get (cdr (assoc profile gh-profile-alist)) :password)
-                   (gh-config "password"))))
+(defun github-auth-get-password (&optional remember)
+  (let* ((profile (github-profile-current-profile))
+         (pass (or (plist-get (cdr (assoc profile github-auth-alist)) :password)
+                   (plist-get (cdr (assoc profile github-profile-alist)) :password)
+                   (github-config "password"))))
     (when (not pass)
       (setq pass (read-passwd "GitHub password: "))
       (when remember
-        (gh-set-config "password" pass)))
+        (github-set-config "password" pass)))
     (when remember
-      (gh-auth-remember profile :password pass))
+      (github-auth-remember profile :password pass))
     pass))
 
-(declare-function 'gh-oauth-auth-new "gh-oauth")
+(declare-function 'github-oauth-auth-new "github-oauth")
 
-(defun gh-auth-get-oauth-token ()
-  (let* ((profile (gh-profile-current-profile))
-         (token (or (plist-get (cdr (assoc profile gh-auth-alist)) :token)
-                    (plist-get (cdr (assoc profile gh-profile-alist)) :token)
-                    (gh-config "oauth-token"))))
+(defun github-auth-get-oauth-token ()
+  (let* ((profile (github-profile-current-profile))
+         (token (or (plist-get (cdr (assoc profile github-auth-alist)) :token)
+                    (plist-get (cdr (assoc profile github-profile-alist)) :token)
+                    (github-config "oauth-token"))))
     (when (not token)
-      (let* ((api (make-instance 'gh-oauth-api))
-             (tok (and (fboundp 'gh-oauth-auth-new)
-                       (oref (oref (funcall 'gh-oauth-auth-new api
+      (let* ((api (make-instance 'github-oauth-api))
+             (tok (and (fboundp 'github-oauth-auth-new)
+                       (oref (oref (funcall 'github-oauth-auth-new api
                                             '(user repo gist)) :data)
                              :token))))
         (setq token (or tok (read-string "GitHub OAuth token: ")))
-        (gh-set-config "oauth-token" token)))
-    (gh-auth-remember profile :token token)
+        (github-set-config "oauth-token" token)))
+    (github-auth-remember profile :token token)
     token))
 
 ;;;###autoload
-(defclass gh-authenticator ()
+(defclass github-authenticator ()
   ((username :initarg :username :initform nil))
   "Abstract authenticator")
 
-(defmethod initialize-instance ((auth gh-authenticator) &rest args)
+(defmethod initialize-instance ((auth github-authenticator) &rest args)
   (call-next-method)
   (or (oref auth :username)
-      (oset auth :username (gh-auth-get-username))))
+      (oset auth :username (github-auth-get-username))))
 
-(defmethod gh-auth-modify-request ((auth gh-authenticator) req)
+(defmethod github-auth-modify-request ((auth github-authenticator) req)
   req)
 
 ;;;###autoload
-(defclass gh-auth-2fa-callback (gh-url-callback)
+(defclass github-auth-2fa-callback (github-url-callback)
   ((req :initarg :req :initform nil))
   "2-factor callback")
 
-(defmethod gh-url-callback-run ((cb gh-auth-2fa-callback) resp)
+(defmethod github-url-callback-run ((cb github-auth-2fa-callback) resp)
   (when (equal (oref resp :http-status) 401)
     (let* ((otp-header "X-GitHub-OTP")
            (h (assoc otp-header (oref resp :headers))))
@@ -122,20 +122,20 @@
 
           (object-add-to-list req :headers
                               (cons otp-header otp))
-          (gh-url-run-request req resp))))))
+          (github-url-run-request req resp))))))
 
 ;;;###autoload
-(defclass gh-password-authenticator (gh-authenticator)
+(defclass github-password-authenticator (github-authenticator)
   ((password :initarg :password :protection :private :initform nil)
    (remember :allocation :class :initform t))
   "Password-based authenticator")
 
-(defmethod initialize-instance ((auth gh-password-authenticator) &rest args)
+(defmethod initialize-instance ((auth github-password-authenticator) &rest args)
   (call-next-method)
   (or (oref auth :password)
-      (oset auth :password (gh-auth-get-password (oref auth remember)))))
+      (oset auth :password (github-auth-get-password (oref auth remember)))))
 
-(defmethod gh-auth-modify-request ((auth gh-password-authenticator) req)
+(defmethod github-auth-modify-request ((auth github-password-authenticator) req)
   (object-add-to-list req :headers
                       (cons "Authorization"
                             (concat "Basic "
@@ -144,30 +144,30 @@
                                              (encode-coding-string
                                               (oref auth :password) 'utf-8))))))
   (object-add-to-list req :install-callbacks
-                      (make-instance gh-auth-2fa-callback :req req))
+                      (make-instance github-auth-2fa-callback :req req))
   req)
 
 ;;;###autoload
-(defclass gh-oauth-authenticator (gh-authenticator)
+(defclass github-oauth-authenticator (github-authenticator)
   ((token :initarg :token :protection :private :initform nil))
   "Oauth-based authenticator")
 
-(defmethod initialize-instance ((auth gh-oauth-authenticator) &rest args)
+(defmethod initialize-instance ((auth github-oauth-authenticator) &rest args)
   (call-next-method)
   (or (oref auth :token)
-      (oset auth :token (gh-auth-get-oauth-token))))
+      (oset auth :token (github-auth-get-oauth-token))))
 
-(defmethod gh-auth-modify-request ((auth gh-oauth-authenticator) req)
+(defmethod github-auth-modify-request ((auth github-oauth-authenticator) req)
   (object-add-to-list req :headers
                       (cons "Authorization"
                             (encode-coding-string
                              (format "token %s" (oref auth :token)) 'utf-8)))
   req)
 
-(provide 'gh-auth)
+(provide 'github-auth)
 ;; to avoid circular dependencies...
-(require 'gh-oauth)
-;;; gh-auth.el ends here
+(require 'github-oauth)
+;;; github-auth.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

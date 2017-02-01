@@ -1,4 +1,4 @@
-;;; gh-comments.el --- support for comment-enabled APIs
+;;; github-comments.el --- support for comment-enabled APIs
 
 ;; Copyright (C) 2014-2015  Yann Hodique
 
@@ -32,35 +32,35 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-common)
-(require 'gh-api)
+(require 'github-common)
+(require 'github-api)
 
-(defun gh-comments-list (base) ;; (api gh-comments-api-mixin)
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-comment) "GET"
-   (format "%s/comments" (gh-ref-object-base base))))
+(defun github-comments-list (base) ;; (api github-comments-api-mixin)
+  (github-api-authenticated-request
+   (github-object-list-reader github-comment) "GET"
+   (format "%s/comments" (github-ref-object-base base))))
 
-(defun gh-comments-get (base comment-id) ;; (api gh-comments-api-mixin)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-comment) "GET"
-   (format "%s/comments/%s" (gh-ref-object-base base) comment-id)))
+(defun github-comments-get (base comment-id) ;; (api github-comments-api-mixin)
+  (github-api-authenticated-request
+   (github-object-reader github-comment) "GET"
+   (format "%s/comments/%s" (github-ref-object-base base) comment-id)))
 
-(defun gh-comments-update (base comment-id comment) ;; (api gh-comments-api-mixin)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-comment) "PATCH"
-   (format "%s/comments/%s" (gh-ref-object-base base) comment-id)
-   (gh-comment-req-to-update comment)))
+(defun github-comments-update (base comment-id comment) ;; (api github-comments-api-mixin)
+  (github-api-authenticated-request
+   (github-object-reader github-comment) "PATCH"
+   (format "%s/comments/%s" (github-ref-object-base base) comment-id)
+   (github-comment-req-to-update comment)))
 
-(defun gh-comments-new (base comment) ;; (api gh-comments-api-mixin)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-comment) "POST"
-   (format "%s/comments" (gh-ref-object-base base))
-   (gh-comment-req-to-update comment)))
+(defun github-comments-new (base comment) ;; (api github-comments-api-mixin)
+  (github-api-authenticated-request
+   (github-object-reader github-comment) "POST"
+   (format "%s/comments" (github-ref-object-base base))
+   (github-comment-req-to-update comment)))
 
-(defun gh-comments-delete (base comment-id) ;; (api gh-comments-api-mixin)
-  (gh-api-authenticated-request
+(defun github-comments-delete (base comment-id) ;; (api github-comments-api-mixin)
+  (github-api-authenticated-request
    nil "DELETE"
-   (format "%s/comments/%s" (gh-ref-object-base base) comment-id)))
+   (format "%s/comments/%s" (github-ref-object-base base) comment-id)))
 
-(provide 'gh-comments)
-;;; gh-comments.el ends here
+(provide 'github-comments)
+;;; github-comments.el ends here

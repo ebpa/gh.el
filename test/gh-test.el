@@ -1,4 +1,4 @@
-;;; gh-test.el --- test for gh.el
+;;; github-test.el --- test for github.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -35,18 +35,18 @@
 (when (require 'undercover nil t)
   (undercover "*.el" "gh.el/*.el" (:exclude "gh-pkg.el")))
 
-(defun gh-test-get-traces-root ()
+(defun github-test-get-traces-root ()
   (let* ((this-file (car
                      (rassoc-if
                       (lambda (items)
-                        (member (cons 'provide 'gh-test) items))
+                        (member (cons 'provide 'github-test) items))
                       load-history))))
     (concat (file-name-directory this-file)
             "traces/")))
 
-(defmacro gh-test-with-traces-buffers (bufs &rest body)
+(defmacro github-test-with-traces-buffers (bufs &rest body)
   (declare (indent 1) (debug t))
-  (let* ((root (gh-test-get-traces-root))
+  (let* ((root (github-test-get-traces-root))
          (syms nil)
          (specs (mapcar
                  (lambda (s)
@@ -75,15 +75,15 @@
            (and (buffer-name buff)
                 (kill-buffer buff)))))))
 
-(defun gh-test-mock-api (cls)
+(defun github-test-mock-api (cls)
   (make-instance cls :sync t
-                 :auth (make-instance 'gh-authenticator :username "dummy")))
+                 :auth (make-instance 'github-authenticator :username "dummy")))
 
-(defmacro gh-test-mock-url (recs &rest body)
+(defmacro github-test-mock-url (recs &rest body)
   `(mocker-let ((url-retrieve-synchronously
                  (url)
                  ,recs))
      ,@body))
 
-(provide 'gh-test)
-;;; gh-test.el ends here
+(provide 'github-test)
+;;; github-test.el ends here

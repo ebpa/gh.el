@@ -1,4 +1,4 @@
-;;; gh-api.el --- api definition for gh.el
+;;; github-api.el --- api definition for github.el
 
 ;; Copyright (C) 2011  Yann Hodique
 
@@ -34,27 +34,27 @@
 
 (require 'json)
 
-(require 'gh-profile)
-(require 'gh-url)
-(require 'gh-auth)
-(require 'gh-cache)
+(require 'github-profile)
+(require 'github-url)
+(require 'github-auth)
+(require 'github-cache)
 
 (require 'logito)
 
-(defgroup gh-api nil
+(defgroup github-api nil
   "Github API."
-  :group 'gh)
+  :group 'github)
 
-(defvar gh-api-api-session nil "Current GitHub API session.")
-;;(setq gh-api-session (gh-api "API"))
+(defvar github-api-api-session nil "Current GitHub API session.")
+;;(setq github-api-session (github-api "API"))
 
-(defcustom gh-api-username-filter 'gh-api-enterprise-username-filter
+(defcustom github-api-username-filter 'github-api-enterprise-username-filter
   "Filter to apply to usernames to build URL components"
   :type 'function
-  :group 'gh-api)
+  :group 'github-api)
 
 ;;;###autoload
-(defclass gh-api ()
+(defclass github-api ()
   ((sync :initarg :sync :initform t)
    (cache :initarg :cache :initform nil)
    (base :initarg :base :type string)
@@ -65,10 +65,10 @@
    (log :initarg :log :initform nil))
   "Github API")
 
-(defun logito-log (level tag string &rest objects) ;; (api gh-api)
-  (apply 'logito-log (oref gh-api-session :log) level tag string objects))
+(defun logito-log (level tag string &rest objects) ;; (api github-api)
+  (apply 'logito-log (oref github-api-session :log) level tag string objects))
 
-(defun gh-api-set-default-auth (api auth)
+(defun github-api-set-default-auth (api auth)
   (let ((auth (or (oref api :auth) auth))
         (cache (oref api :cache))
         (classname (symbol-name (funcall (if (fboundp 'eieio-object-class)
@@ -78,68 +78,68 @@
     (oset api :auth auth)
     (unless (or (null cache)
                 (and (eieio-object-p cache)
-                     (object-of-class-p cache 'gh-cache)))
+                     (object-of-class-p cache 'github-cache)))
       (oset api :cache (make-instance
-                             gh-cache
+                             github-cache
                         :object-name
                         (format "gh/%s/%s"
                                 classname
-                                (gh-api-get-username api)))))))
+                                (github-api-get-username api)))))))
 
-(defun gh-api-expand-resource (resource)
+(defun github-api-expand-resource (resource)
   resource)
 
-(defun gh-api-enterprise-username-filter (username)
+(defun github-api-enterprise-username-filter (username)
   (replace-regexp-in-string (regexp-quote ".") "-" username))
 
-(defun gh-api-get-username () ;; (api gh-api)
-  (let ((username (oref (oref gh-api-session :auth) :username)))
-    (funcall gh-api-username-filter username)))
+(defun github-api-get-username () ;; (api github-api)
+  (let ((username (oref (oref github-api-session :auth) :username)))
+    (funcall github-api-username-filter username)))
 
-(defcustom gh-api-v3-authenticator 'gh-oauth-authenticator
+(defcustom github-api-v3-authenticator 'github-oauth-authenticator
   "Authenticator for Github API v3"
-  :type '(choice (const :tag "Password" gh-password-authenticator)
-                 (const :tag "OAuth" gh-oauth-authenticator))
-  :group 'gh-api)
+  :type '(choice (const :tag "Password" github-password-authenticator)
+                 (const :tag "OAuth" github-oauth-authenticator))
+  :group 'github-api)
 
-(defmethod initialize-instance ((api gh-api) &rest args)
+(defmethod initialize-instance ((api github-api) &rest args)
   (call-next-method)
-  (let ((gh-profile-current-profile (gh-profile-current-profile)))
-    (oset api :profile (gh-profile-current-profile))
-    (oset api :base (gh-profile-url))
-    (gh-api-set-default-auth api
+  (let ((github-profile-current-profile (github-profile-current-profile)))
+    (oset api :profile (github-profile-current-profile))
+    (oset api :base (github-profile-url))
+    (github-api-set-default-auth api
                              (or (oref api :auth)
-                                 (funcall gh-api-v3-authenticator "auth")))))
+                                 (funcall github-api-v3-authenticator "auth")))))
 
 ;;;###autoload
-(defclass gh-api-response (gh-url-response)
+(defclass github-api-response (github-url-response)
   ())
 
-(defun gh-api-json-decode (repr)
+(defun github-api-json-decode (repr)
   (if (or (null repr) (string= repr ""))
       'empty
     (let ((json-array-type 'list))
       (json-read-from-string repr))))
 
-(defun gh-api-json-encode (json)
+(defun github-api-json-encode (json)
   (encode-coding-string (json-encode-list json) 'utf-8))
 
-(defmethod gh-url-response-set-data ((resp gh-api-response) data)
-  (call-next-method resp (gh-api-json-decode data)))
+(defmethod github-url-response-set-data ((resp github-api-response) data)
+  (call-next-method resp (github-api-json-decode data)))
 
 ;;;###autoload
-(defclass gh-api-request (gh-url-request)
+(defclass github-api-request (github-url-request)
   ())
 
 ;;;###autoload
-(defclass gh-api-paged-request (gh-api-request)
+(defclass github-api-paged-request (github-api-request)
   ((page-limit :initarg :page-limit :initform -1)))
 
 ;;;###autoload
-(defclass gh-api-paged-response (gh-api-response)
+(defclass github-api-paged-response (github-api-response)
   ())
 
-(defmethod gh-api-paging-links ((resp gh-api-paged-response))
+(defmethod github-api-paging-links ((resp github-api-paged-response))
   (let ((links-header (cdr (assoc "Link" (oref resp :headers)))))
     (when links-header
       (loop for item in (split-string links-header ", ")
@@ -147,9 +147,9 @@
             collect (cons (match-string 2 item)
                           (match-string 1 item))))))
 
-(defmethod gh-url-response-set-data ((resp gh-api-paged-response) data)
+(defmethod github-url-response-set-data ((resp github-api-paged-response) data)
   (let ((previous-data (oref resp :data))
-        (next (cdr (assoc "next" (gh-api-paging-links resp)))))
+        (next (cdr (assoc "next" (github-api-paging-links resp)))))
     (call-next-method)
     (oset resp :data (append previous-data (oref resp :data)))
     (when (and next (not (equal 304 (oref resp :http-status))))
@@ -168,10 +168,10 @@
           ;; string which will override the params that are set in the
           ;; next link.
           (oset req :query nil)
-          (gh-url-run-request req resp))))))
+          (github-url-run-request req resp))))))
 
-(defun gh-api-authenticated-request (transformer method resource &optional data params page-limit)
-  (let* ((api gh-api-session)
+(defun github-api-authenticated-request (transformer method resource &optional data params page-limit)
+  (let* ((api github-api-session)
          (fmt (oref api :data-format))
          (headers (cond ((eq fmt :form)
                          '(("Content-Type" .
@@ -188,72 +188,72 @@
                          key))
          (has-value (and cache-key (pcache-has cache cache-key)))
          (value (and has-value (pcache-get cache cache-key)))
-         (is-outdated (and has-value (gh-cache-outdated-p cache cache-key)))
-         (etag (and is-outdated (gh-cache-etag cache cache-key)))
+         (is-outdated (and has-value (github-cache-outdated-p cache cache-key)))
+         (etag (and is-outdated (github-cache-etag cache cache-key)))
          (req
           (and (or (not has-value)
                    is-outdated)
-               (gh-auth-modify-request
+               (github-auth-modify-request
                 (oref api :auth)
-                ;; TODO: use gh-api-paged-request only when needed
-                (make-instance 'gh-api-paged-request
+                ;; TODO: use github-api-paged-request only when needed
+                (make-instance 'github-api-paged-request
                                :method method
                                :url (concat (oref api :base)
-                                            (gh-api-expand-resource resource))
+                                            (github-api-expand-resource resource))
                                :query params
                                :headers (if etag
                                             (cons (cons "If-None-Match" etag)
                                                   headers)
                                             headers)
                                :data (or (and (eq fmt :json)
-                                              (gh-api-json-encode data))
+                                              (github-api-json-encode data))
                                          (and (eq fmt :form)
-                                              (gh-url-form-encode data))
+                                              (github-url-form-encode data))
                                          "")
                                :page-limit page-limit)))))
     (cond ((and has-value ;; got value from cache
                 (not is-outdated))
-           (make-instance 'gh-api-response :data-received t :data value))
+           (make-instance 'github-api-response :data-received t :data value))
           (cache-key ;; no value, but cache exists and method is safe
-           (let ((resp (make-instance gh-api-response
+           (let ((resp (make-instance github-api-response
                                       :transform transformer)))
-             (gh-url-run-request req resp)
-             (gh-url-add-response-callback
-              resp (make-instance 'gh-api-callback :cache cache :key cache-key
+             (github-url-run-request req resp)
+             (github-url-add-response-callback
+              resp (make-instance 'github-api-callback :cache cache :key cache-key
                                   :revive etag))
              resp))
           (cache ;; unsafe method, cache exists
            (pcache-invalidate cache key)
-           (gh-url-run-request req (make-instance
-                                    gh-api-response
+           (github-url-run-request req (make-instance
+                                    github-api-response
                                     :transform transformer)))
           (t ;; no cache involved
-           (gh-url-run-request req (make-instance
-                                    gh-api-response
+           (github-url-run-request req (make-instance
+                                    github-api-response
                                     :transform transformer))))))
 
 ;;;###autoload
-(defclass gh-api-callback (gh-url-callback)
+(defclass github-api-callback (github-url-callback)
   ((cache :initarg :cache)
    (key :initarg :key)
    (revive :initarg :revive)))
 
-(defmethod gh-url-callback-run ((cb gh-api-callback) resp)
+(defmethod github-url-callback-run ((cb github-api-callback) resp)
   (let ((cache (oref cb :cache))
         (key (oref cb :key)))
     (if (and (oref cb :revive) (equal (oref resp :http-status) 304))
         (progn
-          (gh-cache-revive cache key)
+          (github-cache-revive cache key)
           (oset resp :data (pcache-get cache key)))
       (pcache-put cache key (oref resp :data))
-      (gh-cache-set-etag cache key
+      (github-cache-set-etag cache key
                          (cdr (assoc "ETag" (oref resp :headers)))))))
 
-(define-obsolete-function-alias 'gh-api-add-response-callback
-  'gh-url-add-response-callback "0.6.0")
+(define-obsolete-function-alias 'github-api-add-response-callback
+  'github-url-add-response-callback "0.6.0")
 
-(provide 'gh-api)
-;;; gh-api.el ends here
+(provide 'github-api)
+;;; github-api.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

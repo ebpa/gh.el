@@ -1,4 +1,4 @@
-;;; gh-cache.el --- caching for gh.el
+;;; github-cache.el --- caching for github.el
 
 ;; Copyright (C) 2011  Yann Hodique
 
@@ -34,30 +34,30 @@
 
 (require 'pcache)
 
-(defconst gh-cache-outdated-expiration-delay (* 60 60 24))
+(defconst github-cache-outdated-expiration-delay (* 60 60 24))
 
-(defconst gh-cache-internal-version-constant 4)
+(defconst github-cache-internal-version-constant 4)
 
-(defconst gh-cache-version-constant
-  (format "%s/gh-%s" pcache-version-constant gh-cache-internal-version-constant))
+(defconst github-cache-version-constant
+  (format "%s/github-%s" pcache-version-constant github-cache-internal-version-constant))
 
 ;;;###autoload
-(defclass gh-cache (pcache-repository)
+(defclass github-cache (pcache-repository)
   ((version-constant :allocation :class)
    (entries :initarg :entries :initform (make-hash-table :test 'equal))
    (safe-methods :allocation :class :initform ("HEAD" "GET" "OPTIONS" "TRACE"))
    (invalidation-chain :allocation :class :initform nil)))
 
-(oset-default 'gh-cache version-constant gh-cache-version-constant)
+(oset-default 'github-cache version-constant github-cache-version-constant)
 
 ;;;###autoload
-(defclass gh-cache-entry (pcache-entry)
+(defclass github-cache-entry (pcache-entry)
   ((etag :initarg :etag :initform nil)
    (outdated :initarg :outdated :initform nil)
    ;; (ttl :initarg :ttl :initform 0)
    ))
 
-(defmethod pcache-invalidate :after ((cache gh-cache) key)
+(defmethod pcache-invalidate :after ((cache github-cache) key)
   (let ((resource (car key)))
     (pcache-map cache #'(lambda (k v)
                           (when (equal (car k) resource)
@@ -70,7 +70,7 @@
                                 (when (equal (car k) nextresource)
                                   (pcache-invalidate cache k)))))))))
 
-(defmethod pcache-get ((cache gh-cache) key &optional default)
+(defmethod pcache-get ((cache github-cache) key &optional default)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (if (not entry)
@@ -85,30 +85,30 @@
          (entry (gethash key table default)))
     (not (eq entry default))))
 
-(defmethod pcache-purge-invalid ((cache gh-cache))
+(defmethod pcache-purge-invalid ((cache github-cache))
   (let ((table (oref cache :entries)))
     (maphash #'(lambda (k e)
-                 (unless (gh-cache-expired-p e)
+                 (unless (github-cache-expired-p e)
                    (remhash k table)))
              table)
     (pcache-save cache)))
 
-(defmethod gh-cache-outdated-p ((cache gh-cache) key)
+(defmethod github-cache-outdated-p ((cache github-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry
          (oref entry :outdated))))
 
-(defmethod gh-cache-expired-p ((cache gh-cache) key)
+(defmethod github-cache-expired-p ((cache github-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
-    (and (gh-cache-outdated-p cache key)
+    (and (github-cache-outdated-p cache key)
          (not
           (let ((time (float-time (current-time))))
-            (< time (+ gh-cache-outdated-expiration-delay
+            (< time (+ github-cache-outdated-expiration-delay
                        (oref entry :timestamp))))))))
 
-(defmethod gh-cache-revive ((cache gh-cache) key)
+(defmethod github-cache-revive ((cache github-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry
@@ -116,20 +116,20 @@
          (oset entry :timestamp (float-time (current-time)))
          t)))
 
-(defmethod gh-cache-etag ((cache gh-cache) key)
+(defmethod github-cache-etag ((cache github-cache) key)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry
          (oref entry :etag))))
 
-(defmethod gh-cache-set-etag ((cache gh-cache) key etag)
+(defmethod github-cache-set-etag ((cache github-cache) key etag)
   (let* ((table (oref cache :entries))
          (entry (gethash key table)))
     (and entry
          (oset entry :etag etag))))
 
-(provide 'gh-cache)
-;;; gh-cache.el ends here
+(provide 'github-cache)
+;;; github-cache.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

@@ -1,4 +1,4 @@
-;;; gh-common.el --- common objects for gh.el
+;;; github-common.el --- common objects for github.el
 
 ;; Copyright (C) 2011  Yann Hodique
 
@@ -35,7 +35,7 @@
 (require 'dash)
 (require 'marshal)
 (require 's)
-(require 'gh-profile)
+(require 'github-profile)
 
 (defgroup gh nil
   "Github API client libraries."
@@ -49,29 +49,29 @@ Emacs. This makes a difference when running with TRAMP."
 
 ;;; Helper functions
 
-(defun gh-read (obj field)
+(defun github-read (obj field)
   (cdr (assoc field obj)))
 
-(defun gh-namespaced-key (key)
-  (let ((profile (gh-profile-current-profile)))
+(defun github-namespaced-key (key)
+  (let ((profile (github-profile-current-profile)))
     (concat "github."
-            (if (string= profile gh-profile-default-profile)
+            (if (string= profile github-profile-default-profile)
                 ""
               (concat profile "."))
             key)))
 
-(defun gh-config (key)
+(defun github-config (key)
   "Returns a GitHub specific value from the global Git config."
   (let ((strip (lambda (string)
                  (if (> (length string) 0)
                      (substring string 0 (- (length string) 1))))))
-    (funcall strip (gh-command-to-string "config" (gh-namespaced-key key)))))
+    (funcall strip (github-command-to-string "config" (github-namespaced-key key)))))
 
-(defun gh-set-config (key value)
+(defun github-set-config (key value)
   "Sets a GitHub specific value to the global Git config."
-  (gh-command-to-string "config" "--global" (gh-namespaced-key key) value))
+  (github-command-to-string "config" "--global" (github-namespaced-key key) value))
 
-(defun gh-command-to-string (&rest args)
+(defun github-command-to-string (&rest args)
   (let ((git (executable-find "git"))
         (runner (if gh-use-local-git-config
                     'call-process
@@ -82,79 +82,79 @@ Emacs. This makes a difference when running with TRAMP."
 ;;; Base classes for common objects
 
 ;;;###autoload
-(defun gh-marshal-default-spec (slot)
+(defun github-marshal-default-spec (slot)
   (let ((slot-name (symbol-name slot)))
     (list (cons 'alist
                 (intern (s-replace "-" "_" slot-name))))))
 
 ;;;###autoload
-(defmacro gh-defclass (name superclass slots &rest options-and-doc)
+(defmacro github-defclass (name superclass slots &rest options-and-doc)
   `(marshal-defclass ,name ,superclass ,slots ,@options-and-doc
-                     :marshal-default-spec gh-marshal-default-spec))
+                     :marshal-default-spec github-marshal-default-spec))
 
 ;;;###autoload
-(gh-defclass gh-object ()
+(github-defclass github-object ()
   ())
 
-(defmethod gh-object-read :static ((obj gh-object) data)
+(defmethod github-object-read :static ((obj github-object) data)
   (let ((target (if (object-p obj) obj
                     (make-instance obj))))
     (when data
-      (gh-object-read-into target data))
+      (github-object-read-into target data))
     target))
 
-(defmethod gh-object-reader :static ((obj gh-object))
-  (apply-partially 'gh-object-read obj))
+(defmethod github-object-reader :static ((obj github-object))
+  (apply-partially 'github-object-read obj))
 
-(defmethod gh-object-list-read :static ((obj gh-object) data)
-  (mapcar (gh-object-reader obj) data))
+(defmethod github-object-list-read :static ((obj github-object) data)
+  (mapcar (github-object-reader obj) data))
 
-(defmethod gh-object-list-reader :static ((obj gh-object))
-  (apply-partially 'gh-object-list-read obj))
+(defmethod github-object-list-reader :static ((obj github-object))
+  (apply-partially 'github-object-list-read obj))
 
-(defmethod gh-object-read-into ((obj gh-object) data)
+(defmethod github-object-read-into ((obj github-object) data)
   (unmarshal obj data 'alist))
 
-(defmethod slot-unbound ((obj gh-object) cls slot-name fn)
+(defmethod slot-unbound ((obj github-object) cls slot-name fn)
   (if (eq fn 'oref) nil
       (call-next-method)))
 
 ;;;###autoload
-(gh-defclass gh-ref-object (gh-object)
+(github-defclass github-ref-object (github-object)
   ((id :initarg :id)
    (url :initarg :url)
    (html-url :initarg :html-url)))
 
-(defmethod gh-ref-object-base ((obj gh-ref-object))
+(defmethod github-ref-object-base ((obj github-ref-object))
   (let ((url (oref obj :url)))
     (--> (s-split "/" url t)
       (-slice it 2)
       (s-join "/" it)
       (concat "/" it))))
 
-(defmethod gh-ref-object-base (obj)
+(defmethod github-ref-object-base (obj)
   (if (stringp obj) obj
-    (error "illegal input for `gh-ref-object-base'")))
+    (error "illegal input for `github-ref-object-base'")))
 
 ;;;###autoload
-(gh-defclass gh-user (gh-ref-object)
+(github-defclass github-user (github-ref-object)
   ((login :initarg :login)
    (gravatar-url :initarg :gravatar-url))
   "Github user object")
 
 ;;;###autoload
-(gh-defclass gh-comment (gh-ref-object)
+(github-defclass github-comment (github-ref-object)
   ((body :initarg :body)
-   (user :initarg :user :initform nil :marshal-type gh-user)
+   (user :initarg :user :initform nil :marshal-type github-user)
    (created-at :initarg :created_at)
    (updated-at :initarg :updated_at))
   "Github comment object")
 
-(defmethod gh-comment-req-to-update ((req gh-comment))
+(defmethod github-comment-req-to-update ((req github-comment))
   `(("body" . ,(oref req :body))))
 
-(provide 'gh-common)
-;;; gh-common.el ends here
+(provide 'github-common)
+;;; github-common.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

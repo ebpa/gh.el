@@ -1,4 +1,4 @@
-;;; gh-org.el --- orgs module for gh.el
+;;; github-org.el --- orgs module for github.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -32,24 +32,24 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-api)
-(require 'gh-auth)
-(require 'gh-common)
+(require 'github-api)
+(require 'github-auth)
+(require 'github-common)
 
 ;;;###autoload
-(gh-defclass gh-orgs-org-stub (gh-ref-object)
+(github-defclass github-orgs-org-stub (github-ref-object)
   ((login :initarg :login)
    (avatar-url :initarg :avatar-url)
    (description :initarg :description)))
 
 ;;;###autoload
-(gh-defclass gh-orgs-plan (gh-object)
+(github-defclass github-orgs-plan (github-object)
   ((name :initarg :name)
    (space :initarg :space)
    (private-repos :initarg :private-repos)))
 
 ;;;###autoload
-(gh-defclass gh-orgs-org (gh-orgs-org-stub)
+(github-defclass github-orgs-org (github-orgs-org-stub)
   ((name :initarg :name)
    (company :initarg :company)
    (blog :initarg :blog)
@@ -67,10 +67,10 @@
    (disk-usage :initarg :disk-usage)
    (collaborators :initarg :collaborators)
    (billing-email :initarg :billing-email)
-   (plan :initarg :plan :initform nil :marshal-type gh-orgs-plan))
+   (plan :initarg :plan :initform nil :marshal-type github-orgs-plan))
   "Class for GitHub organizations")
 
-(defmethod gh-orgs-org-to-obj ((org gh-orgs-org))
+(defmethod github-orgs-org-to-obj ((org github-orgs-org))
   `(,@(when (slot-boundp org :billing-email)
         (list (cons "billing_email" (oref org :billing-email))))
     ,@(when (slot-boundp org :blog)
@@ -84,24 +84,24 @@
     ,@(when (slot-boundp org :name)
         (list (cons "name" (oref org :name))))))
 
-(defun gh-orgs-list (&optional username) ;; (api gh-orgs-api)
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-orgs-org) "GET"
-   (format "/users/%s/orgs" (or username (gh-api-get-username api)))))
+(defun github-orgs-list (&optional username) ;; (api github-orgs-api)
+  (github-api-authenticated-request
+   (github-object-list-reader github-orgs-org) "GET"
+   (format "/users/%s/orgs" (or username (github-api-get-username api)))))
 
-(defun gh-orgs-get (org) ;; (api gh-orgs-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-orgs-org) "GET"
+(defun github-orgs-get (org) ;; (api github-orgs-api)
+  (github-api-authenticated-request
+   (github-object-reader github-orgs-org) "GET"
    (format "/orgs/%s" org)))
 
-(defun gh-orgs-update (org-obj) ;; (api gh-orgs-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-orgs-org) "PATCH"
+(defun github-orgs-update (org-obj) ;; (api github-orgs-api)
+  (github-api-authenticated-request
+   (github-object-reader github-orgs-org) "PATCH"
    (format "/orgs/%s" (oref org-obj :login))
-   (apply 'gh-orgs-org-to-obj org-obj nil)))
+   (apply 'github-orgs-org-to-obj org-obj nil)))
 
-(provide 'gh-orgs)
-;;; gh-org.el ends here
+(provide 'github-orgs)
+;;; github-org.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

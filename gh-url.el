@@ -1,4 +1,4 @@
-;;; gh-url.el --- url wrapper for gh.el
+;;; github-url.el --- url wrapper for github.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -35,7 +35,7 @@
 (require 'url-http)
 
 ;;;###autoload
-(defclass gh-url-request ()
+(defclass github-url-request ()
   ((method :initarg :method :type string)
    (url :initarg :url :type string)
    (query :initarg :query :initform nil)
@@ -46,7 +46,7 @@
    (install-callbacks :initarg :install-callbacks :initform nil)))
 
 ;;;###autoload
-(defclass gh-url-response ()
+(defclass github-url-response ()
   ((data-received :initarg :data-received :initform nil)
    (data :initarg :data :initform nil)
    (headers :initarg :headers :initform nil)
@@ -55,7 +55,7 @@
    (transform :initarg :transform :initform nil)
    (-req :initarg :-req :initform nil)))
 
-(defmethod gh-url-response-set-data ((resp gh-url-response) data)
+(defmethod github-url-response-set-data ((resp github-url-response) data)
   (let ((transform (oref resp :transform)))
     (oset resp :data
           (if nil ;;transform
@@ -64,13 +64,13 @@
     (oset resp :data-received t)))
 
 ;;;###autoload
-(defclass gh-url-callback ()
+(defclass github-url-callback ()
   nil)
 
-(defmethod gh-url-callback-run ((cb gh-url-callback) resp)
+(defmethod github-url-callback-run ((cb github-url-callback) resp)
   nil)
 
-(defmethod gh-url-response-run-callbacks ((resp gh-url-response))
+(defmethod github-url-response-run-callbacks ((resp github-url-response))
   (let ((copy-list (lambda (list)
                      (if (consp list)
                          (let ((res nil))
@@ -80,22 +80,22 @@
     (let ((data (oref resp :data)))
       (dolist (cb (funcall copy-list (oref resp :callbacks)))
         (cond ((and (object-p cb)
-                    (object-of-class-p cb 'gh-url-callback))
-               (gh-url-callback-run cb resp))
+                    (object-of-class-p cb 'github-url-callback))
+               (github-url-callback-run cb resp))
               ((or (functionp cb) (symbolp cb))
                (funcall cb data))
               (t (apply (car cb) data (cdr cb))))
         (object-remove-from-list resp :callbacks cb))))
   resp)
 
-(defmethod gh-url-add-response-callback ((resp gh-url-response) callback)
+(defmethod github-url-add-response-callback ((resp github-url-response) callback)
   (object-add-to-list resp :callbacks callback t)
   (if (oref resp :data-received)
-    (gh-url-response-run-callbacks resp)
+    (github-url-response-run-callbacks resp)
     resp))
 
 ;;; code borrowed from nicferrier's web.el
-(defun gh-url-parse-headers (data)
+(defun github-url-parse-headers (data)
   (let* ((headers nil)
          (header-lines (split-string data "\n"))
          (status-line (car header-lines)))
@@ -117,49 +117,49 @@
          (push (cons name value) headers)))
     headers))
 
-(defmethod gh-url-response-finalize ((resp gh-url-response))
+(defmethod github-url-response-finalize ((resp github-url-response))
   (when (oref resp :data-received)
-    (gh-url-response-run-callbacks resp)))
+    (github-url-response-run-callbacks resp)))
 
-(defmethod gh-url-response-init ((resp gh-url-response)
+(defmethod github-url-response-init ((resp github-url-response)
                                  buffer)
   (declare (special url-http-end-of-headers))
   (unwind-protect
       (with-current-buffer buffer
-        (let ((headers (gh-url-parse-headers
+        (let ((headers (github-url-parse-headers
                         (buffer-substring
                          (point-min) (1+ url-http-end-of-headers)))))
           (oset resp :headers headers)
           (oset resp :http-status (read (cdr (assoc 'status-code headers)))))
         (goto-char (1+ url-http-end-of-headers))
         (let ((raw (buffer-substring (point) (point-max))))
-          (gh-url-response-set-data resp raw)))
+          (github-url-response-set-data resp raw)))
     (kill-buffer buffer))
-  (gh-url-response-finalize resp)
+  (github-url-response-finalize resp)
   resp)
 
-(defun gh-url-set-response (status req-resp)
+(defun github-url-set-response (status req-resp)
   (set-buffer-multibyte t)
   (destructuring-bind (req resp) req-resp
     (let ((responses-req (clone req))
           (num (oref req :num-retries)))
       (oset resp :-req responses-req)
       (if (or (null num) (zerop num))
-          (gh-url-response-init resp (current-buffer))
+          (github-url-response-init resp (current-buffer))
         (condition-case err
-            (gh-url-response-init resp (current-buffer))
+            (github-url-response-init resp (current-buffer))
           (error
            (oset req :num-retries (1- num))
-           (gh-url-run-request req resp)))))))
+           (github-url-run-request req resp)))))))
 
-(defun gh-url-form-encode (form)
+(defun github-url-form-encode (form)
   (mapconcat (lambda (x) (format "%s=%s" (car x) (cdr x)))
              form "&"))
 
-(defun gh-url-params-encode (form)
-  (concat "?" (gh-url-form-encode form)))
+(defun github-url-params-encode (form)
+  (concat "?" (github-url-form-encode form)))
 
-(defmethod gh-url-run-request ((req gh-url-request) &optional resp)
+(defmethod github-url-run-request ((req github-url-request) &optional resp)
   (let ((url-registered-auth-schemes
          '(("basic" ignore . 4))) ;; don't let default handlers kick in
         (url-privacy-level 'high)
@@ -169,23 +169,23 @@
         (url (concat (oref req :url)
                      (let ((params (oref req :query)))
                        (if params
-                           (gh-url-params-encode params)
+                           (github-url-params-encode params)
                          "")))))
     (if (oref req :async)
-        (let* ((resp (or resp (make-instance gh-url-response)))
+        (let* ((resp (or resp (make-instance github-url-response)))
                (req-resp (list req resp)))
           (with-current-buffer
-              (url-retrieve url 'gh-url-set-response (list req-resp))
+              (url-retrieve url 'github-url-set-response (list req-resp))
             (set (make-local-variable 'url-registered-auth-schemes)
                  url-registered-auth-schemes)))
-      (let* ((resp (or resp (make-instance gh-url-response)))
+      (let* ((resp (or resp (make-instance github-url-response)))
              (req-resp (list req resp)))
         (with-current-buffer (url-retrieve-synchronously url)
-          (gh-url-set-response nil req-resp)))))
+          (github-url-set-response nil req-resp)))))
   (mapc (lambda (cb)
-          (gh-url-add-response-callback resp cb))
+          (github-url-add-response-callback resp cb))
         (oref req :install-callbacks))
   resp)
 
-(provide 'gh-url)
-;;; gh-url.el ends here
+(provide 'github-url)
+;;; github-url.el ends here

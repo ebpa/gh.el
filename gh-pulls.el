@@ -1,4 +1,4 @@
-;;; gh-pulls.el --- pull requests module for gh.el
+;;; github-pulls.el --- pull requests module for github.el
 
 ;; Copyright (C) 2011  Yann Hodique
 
@@ -32,21 +32,21 @@
 ;;;###autoload
 (require 'eieio)
 
-(require 'gh-api)
-(require 'gh-auth)
-(require 'gh-comments)
-(require 'gh-common)
+(require 'github-api)
+(require 'github-auth)
+(require 'github-comments)
+(require 'github-common)
 
-(require 'gh-repos)
+(require 'github-repos)
 
 ;;;###autoload
-(defclass gh-pulls-cache (gh-cache)
+(defclass github-pulls-cache (github-cache)
   ((invalidation-chain :allocation :class
                        :initform '(("^/repos/.*/.*/pulls$" . "\0")
                                    ("^/repos/.*/.*/pulls/.*$" . "\0")))))
 
 ;;;###autoload
-(gh-defclass gh-pulls-comment (gh-comment)
+(github-defclass github-pulls-comment (github-comment)
   ((path :initarg :path)
    (diff-hunk :initarg :diff-hunk)
    (position :initarg :position)
@@ -55,7 +55,7 @@
    (original-commit-id :initarg :original-commit-id)
    (in-reply-to :initarg :in-reply-to :initform nil)))
 
-(defmethod gh-pulls-comment-req-to-create ((req gh-pulls-comment))
+(defmethod github-pulls-comment-req-to-create ((req github-pulls-comment))
   (let ((in-reply-to (oref req in-reply-to))
 	(to-update `(("body" . ,(oref req body)))))
     (if in-reply-to
@@ -66,7 +66,7 @@
     to-update))
 
 ;;;###autoload
-(gh-defclass gh-pulls-request-stub (gh-ref-object)
+(github-defclass github-pulls-request-stub (github-ref-object)
   ((diff-url :initarg :diff-url)
    (patch-url :initarg :patch-url)
    (issue-url :initarg :issue-url)
@@ -78,23 +78,23 @@
    (updated-at :initarg :updated-at)
    (closed-at :initarg :closed-at)
    (merged-at :initarg :merged-at)
-   (head :initarg :head :initform nil :marshal-type gh-repos-ref)
-   (base :initarg :base :initform nil :marshal-type gh-repos-ref)))
+   (head :initarg :head :initform nil :marshal-type github-repos-ref)
+   (base :initarg :base :initform nil :marshal-type github-repos-ref)))
 
 ;;;###autoload
-(gh-defclass gh-pulls-request (gh-pulls-request-stub)
+(github-defclass github-pulls-request (github-pulls-request-stub)
   ((merged :initarg :merged)
    (mergeable :initarg :mergeable)
    (merged-by :initarg :merged-by)
    (comments :initarg :comments)
-   (user :initarg :user :initform nil :marshal-type gh-user)
+   (user :initarg :user :initform nil :marshal-type github-user)
    (commits :initarg :commits)
    (additions :initarg :additions)
    (deletions :initarg :deletions)
    (changed-files :initarg :changed-files))
   "Git pull requests API")
 
-(defmethod gh-pulls-req-to-new ((req gh-pulls-request))
+(defmethod github-pulls-req-to-new ((req github-pulls-request))
   (let ((head (oref req :head))
         (base (oref req :base)))
     `(("title" . ,(oref req :title))
@@ -102,56 +102,56 @@
       ("head" . ,(or (oref head :ref) (oref head :sha)))
       ("base" . ,(or (oref base :ref) (oref base :sha))))))
 
-(defmethod gh-pulls-req-to-update ((req gh-pulls-request-stub))
+(defmethod github-pulls-req-to-update ((req github-pulls-request-stub))
   `(("title" . ,(oref req :title))
     ("body" . ,(oref req :body))
     ("state" . ,(oref req :state))))
 
-(defun gh-pulls-list (user repo) ;; (api gh-pulls-api)
-  (gh-api-authenticated-request
-   (gh-object-list-reader gh-pulls-request) "GET"
+(defun github-pulls-list (user repo) ;; (api github-pulls-api)
+  (github-api-authenticated-request
+   (github-object-list-reader github-pulls-request) "GET"
    (format "/repos/%s/%s/pulls" user repo)))
 
-(defun gh-pulls-get (user repo id) ;; (api gh-pulls-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-pulls-request) "GET"
+(defun github-pulls-get (user repo id) ;; (api github-pulls-api)
+  (github-api-authenticated-request
+   (github-object-reader github-pulls-request) "GET"
    (format "/repos/%s/%s/pulls/%s" user repo id)))
 
-(defun gh-pulls-new (user repo req) ;; (api gh-pulls-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-pulls-request) "POST"
+(defun github-pulls-new (user repo req) ;; (api github-pulls-api)
+  (github-api-authenticated-request
+   (github-object-reader github-pulls-request) "POST"
    (format "/repos/%s/%s/pulls" user repo)
-   (gh-pulls-req-to-new req)))
+   (github-pulls-req-to-new req)))
 
-(defun gh-pulls-update (user repo id req) ;; (api gh-pulls-api)
-  (gh-api-authenticated-request
-   (gh-object-reader gh-pulls-request) "PATCH"
+(defun github-pulls-update (user repo id req) ;; (api github-pulls-api)
+  (github-api-authenticated-request
+   (github-object-reader github-pulls-request) "PATCH"
    (format "/repos/%s/%s/pulls/%s" user repo id)
-   (gh-pulls-req-to-update req)))
+   (github-pulls-req-to-update req)))
 
 ;;; Comments
 
-(defun gh-pulls-comments-list (user repo pull-id) ;; (api gh-pulls-api)
-  (gh-comments-list (format "/repos/%s/%s/pulls/%s" user repo pull-id)))
+(defun github-pulls-comments-list (user repo pull-id) ;; (api github-pulls-api)
+  (github-comments-list (format "/repos/%s/%s/pulls/%s" user repo pull-id)))
 
-(defun gh-pulls-comments-get (user repo comment-id) ;; (api gh-pulls-api)
-  (gh-comments-get (format "/repos/%s/%s/pulls" user repo) comment-id))
+(defun github-pulls-comments-get (user repo comment-id) ;; (api github-pulls-api)
+  (github-comments-get (format "/repos/%s/%s/pulls" user repo) comment-id))
 
-(defun gh-pulls-comments-update (
+(defun github-pulls-comments-update (
                                       user repo comment-id comment)
-  (gh-comments-update (format "/repos/%s/%s/pulls" user repo)
-                      comment-id (gh-comment-req-to-update comment)))
+  (github-comments-update (format "/repos/%s/%s/pulls" user repo)
+                      comment-id (github-comment-req-to-update comment)))
 
-(defun gh-pulls-comments-new (
+(defun github-pulls-comments-new (
                                    user repo pull-id comment)
-  (gh-comments-new (format "/repos/%s/%s/pulls/%s" user repo pull-id)
-                   (gh-pulls-comment-req-to-create comment)))
+  (github-comments-new (format "/repos/%s/%s/pulls/%s" user repo pull-id)
+                   (github-pulls-comment-req-to-create comment)))
 
-(defun gh-pulls-comments-delete (user repo comment-id) ;; (api gh-pulls-api)
-  (gh-comments-delete (format "/repos/%s/%s/pulls" user repo) comment-id))
+(defun github-pulls-comments-delete (user repo comment-id) ;; (api github-pulls-api)
+  (github-comments-delete (format "/repos/%s/%s/pulls" user repo) comment-id))
 
-(provide 'gh-pulls)
-;;; gh-pulls.el ends here
+(provide 'github-pulls)
+;;; github-pulls.el ends here
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

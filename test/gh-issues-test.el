@@ -1,4 +1,4 @@
-;;; gh-issues-test.el --- test fir gh-issues.el
+;;; github-issues-test.el --- test fir github-issues.el
 
 ;; Copyright (C) 2012  Yann Hodique
 
@@ -26,27 +26,27 @@
 
 ;;; Code:
 
-(require 'gh-test)
-(require 'gh-issues)
+(require 'github-test)
+(require 'github-issues)
 
-(defun gh-issues-test:test-regular-issue (issue)
+(defun github-issues-test:test-regular-issue (issue)
   (should (equal (oref issue :number) 1347))
   (should (equal (oref issue :state) "open")))
 
-(ert-deftest gh-issues-test:regular-list ()
-  (let* ((api (gh-test-mock-api 'gh-issues-api))
+(ert-deftest github-issues-test:regular-list ()
+  (let* ((api (github-test-mock-api 'github-issues-api))
          (issues
-          (gh-test-with-traces-buffers ((gists-buf "list_issues_sample.txt"))
-            (gh-test-mock-url ((:record-cls mocker-stub-record
+          (github-test-with-traces-buffers ((gists-buf "list_issues_sample.txt"))
+            (github-test-mock-url ((:record-cls mocker-stub-record
                                              :output gists-buf))
                                (oref
-                                (gh-issues-issue-list "octocat"
+                                (github-issues-issue-list "octocat"
                                                       "Hello-World")
                                 :data)))))
     (should (equal (length issues) 1))
     (let ((issue (car issues)))
-      (should (object-of-class-p issue 'gh-issues-issue))
-      (gh-issues-test:test-regular-issue issue))))
+      (should (object-of-class-p issue 'github-issues-issue))
+      (github-issues-test:test-regular-issue issue))))
 
-(provide 'gh-issues-test)
-;;; gh-issues-test.el ends here
+(provide 'github-issues-test)
+;;; github-issues-test.el ends here

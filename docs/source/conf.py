@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# gh.el documentation build configuration file, created by
+# github.el documentation build configuration file, created by
 # sphinx-quickstart on Sat Dec  3 20:56:15 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'gh.el'
+project = u'github.el'
 copyright = u'2011, Yann Hodique'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'gheldoc'
+htmlhelp_basename = 'githubeldoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'ghel.tex', u'gh.el User Manual',
+  ('index', 'githubel.tex', u'github.el User Manual',
    u'Yann Hodique', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'ghel', u'gh.el User Manual',
+    ('index', 'githubel', u'github.el User Manual',
      [u'Yann Hodique'], 1)
 ]
 
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'gh', u'gh.el User Manual',
-   u'Yann Hodique', 'gh.el', 'Using GitHub from Emacs.',
+  ('index', 'github', u'github.el User Manual',
+   u'Yann Hodique', 'github.el', 'Using GitHub from Emacs.',
    'Emacs'),
 ]
 
@@ -245,7 +245,7 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'gh.el'
+epub_title = u'github.el'
 epub_author = u'Yann Hodique'
 epub_publisher = u'Yann Hodique'
 epub_copyright = u'2011, Yann Hodique'
